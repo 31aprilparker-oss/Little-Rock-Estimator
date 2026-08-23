@@ -1,11 +1,17 @@
 {
-  "name": "Little Rock Construction Estimator",
-  "short_name": "LR Estimator",
+  "name": "Azteca Elite Construction Estimator",
+  "short_name": "Azteca Estimator",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f4f6f8",
   "theme_color": "#173f5f",
   "scope": "./",
-  "description": "Commercial metal framing and drywall estimating app",
-  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

@@ -13,9 +13,9 @@ label{font-size:11px;font-weight:800;color:#52606d;display:block;margin-bottom:4
 .proposal{background:#fff;padding:24px;border:1px solid #d9dee3;border-radius:12px}.proposal h1{margin:0;color:#173f5f}.line{border-top:2px solid #173f5f;margin:14px 0}
 footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:8px;text-align:center;font-size:10px;color:#65727d}
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
-</style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4 Blueprint Takeoff</p></header>
-<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script><script type="module">import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";window.bpPdfLib=pdfjsLib;</script></head><body>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.1 Blueprint Takeoff & Review</p></header>
+<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="blueprint">Blueprint</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
 
@@ -66,7 +66,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Sheet</th><th>Area / Wall</th><th>Wall LF</th><th>Height</th><th>Stud</th><th>Gauge</th><th>Spacing</th><th>Drywall</th><th>Action</th></tr></thead>
+        <thead><tr><th>Sheet</th><th>Area / Wall</th><th>Wall LF</th><th>Height</th><th>Stud</th><th>Gauge</th><th>Spacing</th><th>Drywall</th><th>Sides</th><th>Flags</th><th>Confidence</th><th>Action</th></tr></thead>
         <tbody id="bpTakeoffRows"></tbody>
       </table>
     </div>
@@ -87,7 +87,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="labor" class="tab"><div class="card"><h2>Labor Production</h2><p class="muted">Editable hours per unit. Validate against your crew's actual production.</p><div class="scroll"><table><thead><tr><th>Work</th><th>Qty</th><th>Unit</th><th>Hrs/Unit</th><th>Hours</th><th>Cost</th></tr></thead><tbody id="laborRows"></tbody></table></div><h2>Total Labor: <span id="laborTotal">$0</span></h2></div></section>
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4 • First production-oriented prototype</footer>
+</main><footer>Azteca Elite Construction Estimator v4.1 • Blueprint takeoff review prototype</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[];
@@ -113,7 +113,8 @@ let lq=[x.wall,x.studs*10+x.track,openings.reduce((s,o)=>s+o.qty,0),areas.reduce
 $("bProject").textContent=$("projectName").value||"";$("bCustomer").textContent=$("customer").value||"";$("bAddress").textContent=$("address").value||"";$("bNo").textContent=$("estimateNo").value||"";$("bScope").textContent=$("scope").value||"Commercial metal framing and drywall work as quantified in this estimate.";$("bidRows").innerHTML=`<tr><td>Materials</td><td class=right>${M(x.material)}</td></tr><tr><td>Labor</td><td class=right>${M(x.labor)}</td></tr><tr><td>Equipment / Misc.</td><td class=right>${M(x.p.misc)}</td></tr><tr><td>Subtotal</td><td class=right>${M(x.sub)}</td></tr><tr><td>Overhead</td><td class=right>${M(x.oh)}</td></tr><tr><td>Profit</td><td class=right>${M(x.profit)}</td></tr><tr><td>Tax</td><td class=right>${M(x.tax)}</td></tr>`;$("bTotal").textContent=M(x.total);renderAreas();renderOpenings();renderSaved()}
 function tab(id){document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));$(id).classList.add("active");document.querySelector(`[data-tab="${id}"]`).classList.add("active")}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));document.querySelectorAll("input,select,textarea").forEach(e=>e.addEventListener("input",render));
-// ---------- Blueprint Takeoff V4 ----------
+// ---------- Blueprint Takeoff V4.1 ----------
+let bpState={pages:[],findings:[],candidates:[],notes:localStorage.getItem("azteca_bp_notes")||""};
 function bpClassify(text, pageNum){
   const t = (text||"").toUpperCase();
   let type="Other", useful="Reference";
@@ -163,31 +164,40 @@ function bpConfidence(kind, value){
   return 0.50;
 }
 function bpRender(){
-  const pages=bpState.pages||[];
+  const pages=bpState.pages||[], fs=bpState.findings||[], cs=bpState.candidates||[];
   $("bpSummary").innerHTML=[
-    ["Sheets",pages.length],["Findings",bpState.findings.length],["Candidates",bpState.candidates.length],["Accepted",bpState.candidates.filter(x=>x.accepted).length]
+    ["Sheets",pages.length],["Findings",fs.length],["Wall Candidates",cs.length],["Accepted",cs.filter(x=>x.reviewed).length]
   ].map(x=>`<div class="card"><span class="muted">${x[0]}</span><div class="metric">${x[1]}</div></div>`).join("");
-  $("bpSheets").innerHTML=pages.length?pages.map((p,i)=>`<tr><td>Page ${p.page}</td><td>${p.type}</td><td>${p.useful}</td><td>${(p.text||"").length.toLocaleString()} chars</td><td><button class="secondary" onclick="bpShowPage(${i})">View Text</button></td></tr>`).join(""):"<tr><td colspan=5>No sheets uploaded.</td></tr>";
-  $("bpFindings").innerHTML=bpState.findings.length?bpState.findings.map((f,i)=>`<tr><td>${f.sheet}</td><td>${f.finding}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round(f.confidence*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Accept'}</button></td></tr>`).join(""):"<tr><td colspan=5>No findings yet.</td></tr>";
-  $("bpTakeoffRows").innerHTML=bpState.candidates.length?bpState.candidates.map((c,i)=>`<tr><td>${c.sheet}</td><td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td><td><input type=number value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value"></td><td><input type=number value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value"></td><td><select onchange="bpState.candidates[${i}].stud=this.value">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].gauge=this.value">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].spacing=this.value">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].drywall=this.value">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td><td><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRender()">Delete</button></td></tr>`).join(""):"<tr><td colspan=9>No candidate wall areas yet. Accept a dimension or add one manually.</td></tr>";
+  $("bpSheets").innerHTML=pages.length?pages.map((p,i)=>`<tr><td>Page ${p.page}</td><td>${escapeHtml(p.type)}</td><td>${escapeHtml(p.useful)}</td><td>${(p.text||"").length.toLocaleString()} chars</td><td><button class="secondary" onclick="bpShowPage(${i})">View Text</button></td></tr>`).join(""):"<tr><td colspan=5>No sheets uploaded.</td></tr>";
+  $("bpFindings").innerHTML=fs.length?fs.map((f,i)=>`<tr><td>${escapeHtml(f.sheet)}</td><td>${escapeHtml(f.finding)}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round(f.confidence*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Accept'}</button></td></tr>`).join(""):"<tr><td colspan=5>No findings yet.</td></tr>";
+  $("bpTakeoffRows").innerHTML=cs.length?cs.map((c,i)=>`<tr>
+    <td>${escapeHtml(c.sheet)}</td>
+    <td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td>
+    <td><input type=number min=0 step=.1 value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value"></td>
+    <td><input type=number min=0 step=.1 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value"></td>
+    <td><select onchange="bpState.candidates[${i}].stud=this.value">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td>
+    <td><select onchange="bpState.candidates[${i}].gauge=this.value">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td>
+    <td><select onchange="bpState.candidates[${i}].spacing=this.value">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td>
+    <td><select onchange="bpState.candidates[${i}].drywall=this.value">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td>
+    <td><select onchange="bpState.candidates[${i}].sides=+this.value"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td>
+    <td><input value="${escapeAttr(c.flags||"")}" placeholder="fire, sound, deflection..." onchange="bpState.candidates[${i}].flags=this.value"></td>
+    <td>${Math.round((c.confidence||.58)*100)}%</td>
+    <td><button class="${c.reviewed?'primary':'secondary'}" onclick="bpState.candidates[${i}].reviewed=!bpState.candidates[${i}].reviewed;bpRender()">${c.reviewed?'Reviewed':'Review'}</button> <button class="danger" onclick="bpState.candidates.splice(${i},1);bpRender()">Delete</button></td>
+  </tr>`).join(""):"<tr><td colspan=12>No candidate wall areas yet. Accept dimension findings or add verified quantities manually in Areas.</td></tr>";
 }
 function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function escapeAttr(s){return escapeHtml(s);}
 function bpToggleFinding(i){bpState.findings[i].accepted=!bpState.findings[i].accepted;bpBuildCandidates();bpRender();}
 function bpBuildCandidates(){
-  const accepted=bpState.findings.filter(f=>f.accepted);
-  const dims=accepted.filter(f=>f.kind==="dimension");
-  // Conservative: only dimensions are eligible to become wall-length candidates.
-  // The user reviews/edits every candidate before adding it to Areas.
-  bpState.candidates=dims.slice(0,100).map((d,i)=>({
-    sheet:d.sheet,name:`Blueprint Wall ${i+1}`,lf:Math.round(d.value*10)/10,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2
-  }));
+  const accepted=bpState.findings.filter(f=>f.accepted), dims=accepted.filter(f=>f.kind==="dimension");
+  bpState.candidates=dims.slice(0,100).map((d,i)=>({sheet:d.sheet,name:`Blueprint Wall ${i+1}`,lf:Math.round(d.value*10)/10,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2,flags:"",confidence:d.confidence,reviewed:false}));
 }
 function acceptBlueprintFindings(){
-  if(!bpState.candidates.length){alert("No accepted dimension findings are ready. Review the Blueprint Findings and accept dimensions first.");return;}
-  const existing=areas.length===1 && areas[0].name==="Interior Walls" && areas[0].lf===100 ? [] : areas.slice();
-  areas=existing.concat(bpState.candidates.map(c=>({name:c.name,lf:c.lf,height:c.height,stud:c.stud,gauge:c.gauge,spacing:c.spacing,drywall:c.drywall,sides:2})));
-  render(); alert(`${bpState.candidates.length} reviewed blueprint wall candidate(s) added to Areas. Review them before bidding.`); tab("areas");
+  const ready=bpState.candidates.filter(c=>c.reviewed&&c.lf>0&&c.height>0);
+  if(!ready.length){alert("Review at least one wall candidate, verify its dimensions and mark it Reviewed before applying it to Areas.");return;}
+  const existing=areas.length===1&&areas[0].name==="Interior Walls"&&areas[0].lf===100?[]:areas.slice();
+  areas=existing.concat(ready.map(c=>({name:c.name,lf:c.lf,height:c.height,stud:c.stud,gauge:c.gauge,spacing:c.spacing,drywall:c.drywall,sides:c.sides,flags:c.flags})));
+  render();alert(`${ready.length} reviewed blueprint wall candidate(s) added to Areas. Review them before bidding.`);tab("areas");
 }
 function bpShowPage(i){
   const p=bpState.pages[i]; if(!p)return;

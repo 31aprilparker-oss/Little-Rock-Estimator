@@ -13,16 +13,16 @@ label{font-size:11px;font-weight:800;color:#52606d;display:block;margin-bottom:4
 .proposal{background:#fff;padding:24px;border:1px solid #d9dee3;border-radius:12px}.proposal h1{margin:0;color:#173f5f}.line{border-top:2px solid #173f5f;margin:14px 0}
 footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #ddd;padding:8px;text-align:center;font-size:10px;color:#65727d}
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
-</style><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs" type="module"></script><script type="module">import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";window.bpPdfLib=pdfjsLib;</script></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.1 Blueprint Takeoff & Review</p></header>
-<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="blueprint">Blueprint</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
+</style></head><body>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.2 Blueprint Takeoff & Image Recognition</p></header>
+<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
 
 <section id="blueprint" class="tab">
   <div class="card">
-    <h2>Blueprint Takeoff</h2>
-    <p class="muted">Upload a plan set, extract readable PDF text, identify likely architectural sheets, and build a reviewable takeoff. The app never silently turns a drawing interpretation into a contractual bid.</p>
+    <h2>Blueprint Takeoff • Image Recognition</h2>
+    <p class="muted">Upload a PDF or a photo/scan. Images are analyzed locally in the browser for highlighted wall runs, OCR text, dimensions, room labels, and openings. Every wall quantity remains reviewable before it reaches Areas.</p>
     <div class="actions">
       <label class="primary" style="display:inline-block;cursor:pointer">Upload PDF
         <input id="bpFile" type="file" accept=".pdf,application/pdf" style="display:none">
@@ -30,46 +30,46 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
       <label class="secondary" style="display:inline-block;cursor:pointer">Upload Image
         <input id="bpImage" type="file" accept="image/*" style="display:none">
       </label>
-      <button class="secondary" onclick="clearBlueprint()">Clear Blueprint</button>
+      <button class="secondary" onclick="bpAnalyzeCurrent()">Re-analyze Image</button>
+      <button class="secondary" onclick="clearBlueprint()">Clear</button>
     </div>
     <div id="bpStatus" class="muted" style="margin-top:10px">No blueprint loaded.</div>
   </div>
 
   <div class="card">
-    <h2>Plan Set Sheets</h2>
-    <div class="grid" id="bpSummary"></div>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Sheet</th><th>Likely Type</th><th>Useful For</th><th>Text</th><th></th></tr></thead>
-        <tbody id="bpSheets"></tbody>
-      </table>
+    <h2>Blueprint Viewer</h2>
+    <div class="grid">
+      <div><label>Scale</label><select id="bpScale" onchange="bpScaleChanged()"><option value="0.125">1/8&quot; = 1'-0&quot;</option><option value="0.0625">1/16&quot; = 1'-0&quot;</option><option value="0.25">1/4&quot; = 1'-0&quot;</option><option value="custom">Custom calibration</option></select></div>
+      <div><label>Known calibration length (ft)</label><input id="bpCalFt" type="number" step="0.01" value="10"></div>
+      <div><label>Detected wall runs</label><div class="metric" id="bpWallCount">0</div></div>
+      <div><label>OCR confidence</label><div class="metric" id="bpOcrConfidence">--</div></div>
     </div>
+    <div class="actions">
+      <button class="secondary" onclick="bpStartCalibration()">Calibrate from two points</button>
+      <button class="secondary" onclick="bpResetCalibration()">Reset calibration</button>
+    </div>
+    <div id="bpViewer" style="position:relative;margin-top:10px;background:#eef2f5;border-radius:10px;overflow:auto;text-align:center;min-height:180px">
+      <canvas id="bpCanvas" style="max-width:100%;height:auto;display:block;margin:auto"></canvas>
+    </div>
+    <p class="muted">Calibration: tap/click two points on the drawing that span a known dimension. This compensates for camera/photo size instead of assuming image pixels equal printed inches.</p>
   </div>
 
   <div class="card">
-    <h2>Blueprint Findings</h2>
-    <p class="muted">These are candidate findings from dimensions, wall-type labels, opening schedules, and keywords. Review every item before accepting it.</p>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Sheet</th><th>Finding</th><th>Value</th><th>Confidence</th><th>Use</th></tr></thead>
-        <tbody id="bpFindings"></tbody>
-      </table>
-    </div>
+    <h2>Image Analysis</h2>
+    <div class="grid" id="bpSummary"></div>
+    <div class="scroll"><table><thead><tr><th>Finding</th><th>Value</th><th>Confidence</th><th>Use</th></tr></thead><tbody id="bpFindings"></tbody></table></div>
   </div>
 
   <div class="card">
     <h2>Takeoff Review</h2>
+    <p class="muted">Green/orange highlighted runs are proposed wall candidates. Review length, wall type, height, gauge, spacing, drywall and sides. Nothing is added to Areas until it is marked Reviewed.</p>
     <div class="actions">
-      <button class="primary" onclick="acceptBlueprintFindings()">Add Accepted Findings to Areas</button>
-      <button class="secondary" onclick="tab('areas')">Review Areas</button>
-      <button class="secondary" onclick="tab('openings')">Review Openings</button>
+      <button class="secondary" onclick="bpMarkAllReviewed()">Mark all reviewed</button>
+      <button class="secondary" onclick="bpAddManualCandidate()">+ Add wall manually</button>
+      <button class="secondary" onclick="bpExportCsv()">Export CSV</button>
+      <button class="primary" onclick="acceptBlueprintFindings()">Add reviewed walls to Areas</button>
     </div>
-    <div class="scroll">
-      <table>
-        <thead><tr><th>Sheet</th><th>Area / Wall</th><th>Wall LF</th><th>Height</th><th>Stud</th><th>Gauge</th><th>Spacing</th><th>Drywall</th><th>Sides</th><th>Flags</th><th>Confidence</th><th>Action</th></tr></thead>
-        <tbody id="bpTakeoffRows"></tbody>
-      </table>
-    </div>
+    <div class="scroll"><table><thead><tr><th>Color</th><th>Area / Wall</th><th>Wall LF</th><th>Height</th><th>Stud</th><th>Ga.</th><th>Spacing</th><th>Drywall</th><th>Sides</th><th>Conf.</th><th>Status</th><th></th></tr></thead><tbody id="bpTakeoffRows"></tbody></table></div>
   </div>
 
   <div class="card">
@@ -87,7 +87,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="labor" class="tab"><div class="card"><h2>Labor Production</h2><p class="muted">Editable hours per unit. Validate against your crew's actual production.</p><div class="scroll"><table><thead><tr><th>Work</th><th>Qty</th><th>Unit</th><th>Hrs/Unit</th><th>Hours</th><th>Cost</th></tr></thead><tbody id="laborRows"></tbody></table></div><h2>Total Labor: <span id="laborTotal">$0</span></h2></div></section>
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.1 • Blueprint takeoff review prototype</footer>
+</main><footer>Azteca Elite Construction Estimator v4.2 • Blueprint image recognition prototype</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[];
@@ -113,129 +113,243 @@ let lq=[x.wall,x.studs*10+x.track,openings.reduce((s,o)=>s+o.qty,0),areas.reduce
 $("bProject").textContent=$("projectName").value||"";$("bCustomer").textContent=$("customer").value||"";$("bAddress").textContent=$("address").value||"";$("bNo").textContent=$("estimateNo").value||"";$("bScope").textContent=$("scope").value||"Commercial metal framing and drywall work as quantified in this estimate.";$("bidRows").innerHTML=`<tr><td>Materials</td><td class=right>${M(x.material)}</td></tr><tr><td>Labor</td><td class=right>${M(x.labor)}</td></tr><tr><td>Equipment / Misc.</td><td class=right>${M(x.p.misc)}</td></tr><tr><td>Subtotal</td><td class=right>${M(x.sub)}</td></tr><tr><td>Overhead</td><td class=right>${M(x.oh)}</td></tr><tr><td>Profit</td><td class=right>${M(x.profit)}</td></tr><tr><td>Tax</td><td class=right>${M(x.tax)}</td></tr>`;$("bTotal").textContent=M(x.total);renderAreas();renderOpenings();renderSaved()}
 function tab(id){document.querySelectorAll(".tab").forEach(e=>e.classList.remove("active"));document.querySelectorAll("nav button").forEach(e=>e.classList.remove("active"));$(id).classList.add("active");document.querySelector(`[data-tab="${id}"]`).classList.add("active")}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>tab(b.dataset.tab));document.querySelectorAll("input,select,textarea").forEach(e=>e.addEventListener("input",render));
-// ---------- Blueprint Takeoff V4.1 ----------
-let bpState={pages:[],findings:[],candidates:[],notes:localStorage.getItem("azteca_bp_notes")||""};
-function bpClassify(text, pageNum){
-  const t = (text||"").toUpperCase();
-  let type="Other", useful="Reference";
-  if (/(FLOOR PLAN|FLOOR PLANS|PARTITION PLAN|WALL PLAN)/.test(t)){type="Architectural / Floor Plan"; useful="Wall lengths, rooms, openings, wall types";}
-  else if (/(DOOR SCHEDULE|DOOR SCHED)/.test(t)){type="Door Schedule"; useful="Door counts, sizes, opening verification";}
-  else if (/(WINDOW SCHEDULE|WINDOW SCHED)/.test(t)){type="Window Schedule"; useful="Window counts, sizes, opening verification";}
-  else if (/(WALL TYPE|PARTITION TYPE|WALL TYPES)/.test(t)){type="Wall Type Schedule"; useful="Stud, gauge, spacing, board assembly";}
-  else if (/(REFLECTED CEILING|RCP)/.test(t)){type="Reflected Ceiling Plan"; useful="Ceiling heights, soffits, bulkheads";}
-  else if (/(DETAIL|SECTION|WALL SECTION)/.test(t)){type="Details / Sections"; useful="Headers, deflection, backing, assemblies";}
-  else if (/(GENERAL NOTES|SPECIFICATIONS)/.test(t)){type="Notes / Specifications"; useful="Material and assembly requirements";}
-  return {type,useful};
+// ---------- Blueprint Takeoff V4.2 image recognition ----------
+const BP_PDF_URL="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+const BP_TESS_URL="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+let bpPdfLib=null,bpTesseract=null;
+let bpState={pages:[],findings:[],candidates:[],notes:localStorage.getItem("azteca_bp_notes")||"",image:null,scaleFeetPerPx:null,calibration:null,calibrating:false,calPts:[]};
+
+(async()=>{try{const m=await import(BP_PDF_URL);bpPdfLib=m; }catch(e){console.warn("PDF reader unavailable",e)}})();
+async function bpLoadTesseract(){
+  if(bpTesseract)return bpTesseract;
+  if(window.Tesseract){bpTesseract=window.Tesseract;return bpTesseract;}
+  await new Promise((resolve,reject)=>{const s=document.createElement("script");s.src=BP_TESS_URL;s.onload=resolve;s.onerror=reject;document.head.appendChild(s)});
+  bpTesseract=window.Tesseract; return bpTesseract;
+}
+function bpClassify(text,pageNum){
+  const t=(text||"").toUpperCase(); let type="Other",useful="Reference";
+  if(/FLOOR PLAN|PARTITION PLAN|WALL PLAN|PROPOSED FLOOR PLAN/.test(t)){type="Architectural / Floor Plan";useful="Wall lengths, rooms, openings, wall types"}
+  else if(/DOOR SCHEDULE|DOOR SCHED/.test(t)){type="Door Schedule";useful="Door counts, sizes, opening verification"}
+  else if(/WINDOW SCHEDULE|WINDOW SCHED/.test(t)){type="Window Schedule";useful="Window counts, sizes, opening verification"}
+  else if(/PARTITION SCHEDULE|WALL TYPE|PARTITION TYPE|WALL TYPES/.test(t)){type="Wall Type Schedule";useful="Stud, gauge, spacing, board assembly"}
+  else if(/REFLECTED CEILING|RCP/.test(t)){type="Reflected Ceiling Plan";useful="Ceiling heights, soffits, bulkheads"}
+  else if(/DETAIL|SECTION|WALL SECTION/.test(t)){type="Details / Sections";useful="Headers, deflection, backing, assemblies"}
+  else if(/GENERAL NOTES|SPECIFICATIONS/.test(t)){type="Notes / Specifications";useful="Material and assembly requirements"}
+  return{type,useful}
 }
 function bpDimensions(text){
-  const out=[];
-  const s=text||"";
-  // Feet/inches: 12'-6", 12' 6", 12'-0"
+  const out=[],s=text||""; let m;
   const re1=/(\d{1,3})\s*['’]\s*(\d{1,2}(?:\.\d+)?)\s*["”]?/g;
-  let m; while((m=re1.exec(s))) out.push({raw:m[0],feet:+m[1]+(+m[2]/12),kind:"dimension"});
-  // Inches: 48", 96"
+  while((m=re1.exec(s)))out.push({raw:m[0],feet:+m[1]+(+m[2]/12),kind:"dimension"});
   const re2=/(\d{2,3}(?:\.\d+)?)\s*["”]/g;
-  while((m=re2.exec(s))) out.push({raw:m[0],feet:+m[1]/12,kind:"dimension"});
-  return out.slice(0,80);
+  while((m=re2.exec(s)))out.push({raw:m[0],feet:+m[1]/12,kind:"dimension"});
+  return out.slice(0,120)
 }
 function bpWallTypes(text){
-  const out=[]; const s=text||"";
-  const patterns=[
-    /\b(?:WALL|PARTITION)\s*TYPE\s*([A-Z]?\d{1,3}[A-Z]?)/gi,
-    /\bTYPE\s*([A-Z]?\d{1,3}[A-Z]?)\b/gi,
-    /\b([A-Z]\d{1,3})\b/g
-  ];
-  for(const re of patterns){let m;while((m=re.exec(s))&&out.length<40){if(!out.includes(m[1]))out.push(m[1]);}}
-  return out;
+  const out=[],s=text||"",patterns=[/\b(?:WALL|PARTITION)\s*TYPE\s*([A-Z]?\d{1,3}[A-Z]?)\b/gi,/\bTYPE\s*([A-Z]?\d{1,3}[A-Z]?)\b/gi];
+  for(const re of patterns){let m;while((m=re.exec(s))&&out.length<50)if(!out.includes(m[1]))out.push(m[1])}
+  return out
 }
 function bpOpenings(text){
-  const out=[]; const s=text||"";
-  const door=/\bDOOR(?:\s+NO\.?)?\s*([A-Z]?\d{1,4})?\b/gi;
-  let m; while((m=door.exec(s))&&out.length<30) out.push({type:"Door",label:m[1]||"Door",raw:m[0]});
-  const win=/\bWINDOW(?:\s+NO\.?)?\s*([A-Z]?\d{1,4})?\b/gi;
-  while((m=win.exec(s))&&out.length<60) out.push({type:"Window",label:m[1]||"Window",raw:m[0]});
-  return out;
+  const out=[],s=text||"";let m;
+  const door=/\bDOOR(?:\s+NO\.?)?\s*([A-Z]?\d{1,4})?\b/gi,win=/\bWINDOW(?:\s+NO\.?)?\s*([A-Z]?\d{1,4})?\b/gi;
+  while((m=door.exec(s))&&out.length<30)out.push({type:"Door",label:m[1]||"Door",raw:m[0]});
+  while((m=win.exec(s))&&out.length<60)out.push({type:"Window",label:m[1]||"Window",raw:m[0]});
+  return out
 }
-function bpConfidence(kind, value){
-  if(kind==="sheet") return 0.95;
-  if(kind==="wall-type") return 0.78;
-  if(kind==="opening") return 0.70;
-  if(kind==="dimension") return 0.58;
-  return 0.50;
+function bpConfidence(kind,value){
+  if(kind==="sheet")return .95;if(kind==="wall-type")return .86;if(kind==="opening")return .75;
+  if(kind==="dimension")return .72;if(kind==="ocr")return .70;if(kind==="image-wall")return Math.max(.50,Math.min(.96,value||.5));return .50
 }
-function bpRender(){
-  const pages=bpState.pages||[], fs=bpState.findings||[], cs=bpState.candidates||[];
-  $("bpSummary").innerHTML=[
-    ["Sheets",pages.length],["Findings",fs.length],["Wall Candidates",cs.length],["Accepted",cs.filter(x=>x.reviewed).length]
-  ].map(x=>`<div class="card"><span class="muted">${x[0]}</span><div class="metric">${x[1]}</div></div>`).join("");
-  $("bpSheets").innerHTML=pages.length?pages.map((p,i)=>`<tr><td>Page ${p.page}</td><td>${escapeHtml(p.type)}</td><td>${escapeHtml(p.useful)}</td><td>${(p.text||"").length.toLocaleString()} chars</td><td><button class="secondary" onclick="bpShowPage(${i})">View Text</button></td></tr>`).join(""):"<tr><td colspan=5>No sheets uploaded.</td></tr>";
-  $("bpFindings").innerHTML=fs.length?fs.map((f,i)=>`<tr><td>${escapeHtml(f.sheet)}</td><td>${escapeHtml(f.finding)}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round(f.confidence*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Accept'}</button></td></tr>`).join(""):"<tr><td colspan=5>No findings yet.</td></tr>";
-  $("bpTakeoffRows").innerHTML=cs.length?cs.map((c,i)=>`<tr>
-    <td>${escapeHtml(c.sheet)}</td>
-    <td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td>
-    <td><input type=number min=0 step=.1 value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value"></td>
-    <td><input type=number min=0 step=.1 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value"></td>
-    <td><select onchange="bpState.candidates[${i}].stud=this.value">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select onchange="bpState.candidates[${i}].gauge=this.value">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select onchange="bpState.candidates[${i}].spacing=this.value">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select onchange="bpState.candidates[${i}].drywall=this.value">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td>
-    <td><select onchange="bpState.candidates[${i}].sides=+this.value"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td>
-    <td><input value="${escapeAttr(c.flags||"")}" placeholder="fire, sound, deflection..." onchange="bpState.candidates[${i}].flags=this.value"></td>
-    <td>${Math.round((c.confidence||.58)*100)}%</td>
-    <td><button class="${c.reviewed?'primary':'secondary'}" onclick="bpState.candidates[${i}].reviewed=!bpState.candidates[${i}].reviewed;bpRender()">${c.reviewed?'Reviewed':'Review'}</button> <button class="danger" onclick="bpState.candidates.splice(${i},1);bpRender()">Delete</button></td>
-  </tr>`).join(""):"<tr><td colspan=12>No candidate wall areas yet. Accept dimension findings or add verified quantities manually in Areas.</td></tr>";
+function bpParseFeet(s){
+  const x=String(s||"").replace(/’/g,"'").replace(/”/g,'"').trim();
+  let m=x.match(/(\d{1,3})\s*'\s*(\d{1,2}(?:\.\d+)?)?\s*"?/); if(m)return +m[1]+(+(m[2]||0))/12;
+  m=x.match(/(\d+(?:\.\d+)?)\s*"/); if(m)return +m[1]/12;
+  m=x.match(/(\d+(?:\.\d+)?)/); return m?+m[1]:0
 }
-function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
-function escapeAttr(s){return escapeHtml(s);}
-function bpToggleFinding(i){bpState.findings[i].accepted=!bpState.findings[i].accepted;bpBuildCandidates();bpRender();}
-function bpBuildCandidates(){
-  const accepted=bpState.findings.filter(f=>f.accepted), dims=accepted.filter(f=>f.kind==="dimension");
-  bpState.candidates=dims.slice(0,100).map((d,i)=>({sheet:d.sheet,name:`Blueprint Wall ${i+1}`,lf:Math.round(d.value*10)/10,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2,flags:"",confidence:d.confidence,reviewed:false}));
+function bpColorName(c){return c==="green"?"Green":"Orange"}
+function bpPixelColor(r,g,b){
+  if(g>92 && g>r*1.15 && g>b*1.12 && g-r>22)return"green";
+  if(r>135 && r>g*1.18 && g>45 && g<205 && b<125 && r-b>75)return"orange";
+  return null
 }
-function acceptBlueprintFindings(){
-  const ready=bpState.candidates.filter(c=>c.reviewed&&c.lf>0&&c.height>0);
-  if(!ready.length){alert("Review at least one wall candidate, verify its dimensions and mark it Reviewed before applying it to Areas.");return;}
-  const existing=areas.length===1&&areas[0].name==="Interior Walls"&&areas[0].lf===100?[]:areas.slice();
-  areas=existing.concat(ready.map(c=>({name:c.name,lf:c.lf,height:c.height,stud:c.stud,gauge:c.gauge,spacing:c.spacing,drywall:c.drywall,sides:c.sides,flags:c.flags})));
-  render();alert(`${ready.length} reviewed blueprint wall candidate(s) added to Areas. Review them before bidding.`);tab("areas");
-}
-function bpShowPage(i){
-  const p=bpState.pages[i]; if(!p)return;
-  const w=window.open("","_blank");
-  if(w){w.document.write(`<pre style="white-space:pre-wrap;font-family:monospace;padding:20px">${escapeHtml(p.text||"No readable text found on this page.")}</pre>`);w.document.close();}
-}
-async function bpLoadPdf(file){
-  $("bpStatus").textContent="Reading blueprint PDF…";
-  if(!window.bpPdfLib){$("bpStatus").textContent="PDF reader is still loading. Check your internet connection and try again.";return;}
-  const data=await file.arrayBuffer();
-  const pdf=await window.bpPdfLib.getDocument({data}).promise;
-  bpState.pages=[];bpState.findings=[];bpState.candidates=[];
-  for(let n=1;n<=pdf.numPages;n++){
-    const page=await pdf.getPage(n);
-    const tc=await page.getTextContent();
-    const text=tc.items.map(x=>x.str).join(" ");
-    const cls=bpClassify(text,n);
-    bpState.pages.push({page:n,text,type:cls.type,useful:cls.useful});
-    bpState.findings.push({sheet:`Page ${n}`,finding:"Sheet classification",value:cls.type,confidence:bpConfidence("sheet",cls.type),kind:"sheet",accepted:false});
-    bpWallTypes(text).forEach(v=>bpState.findings.push({sheet:`Page ${n}`,finding:"Possible wall type",value:v,confidence:bpConfidence("wall-type",v),kind:"wall-type",accepted:false}));
-    bpDimensions(text).forEach(d=>bpState.findings.push({sheet:`Page ${n}`,finding:"Dimension candidate",value:d.feet,confidence:bpConfidence("dimension",d.feet),kind:"dimension",accepted:false}));
-    bpOpenings(text).forEach(o=>bpState.findings.push({sheet:`Page ${n}`,finding:o.type,value:o.label,confidence:bpConfidence("opening",o.label),kind:"opening",accepted:false}));
+function bpDetectRuns(canvas){
+  const ctx=canvas.getContext("2d",{willReadFrequently:true}),W=canvas.width,H=canvas.height;
+  const img=ctx.getImageData(0,0,W,H),d=img.data;
+  const y0=Math.floor(H*.12),y1=Math.floor(H*.80),x0=Math.floor(W*.015),x1=Math.floor(W*.985);
+  const mask={green:new Uint8Array(W*H),orange:new Uint8Array(W*H)};
+  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
+    const i=(y*W+x)*4,r=d[i],g=d[i+1],b=d[i+2],c=bpPixelColor(r,g,b);
+    if(c)mask[c][y*W+x]=1;
   }
-  $("bpStatus").textContent=`Loaded ${pdf.numPages} page(s). Review the findings below.`;
-  bpRender();
+  const runs=[];
+  for(const color of ["green","orange"]){
+    const m=mask[color], row=new Int32Array(H), col=new Int32Array(W);
+    for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++)if(m[y*W+x]){row[y]++;col[x]++}
+    function collect(vals,axis){
+      const threshold=Math.max(12,Math.floor((axis==="h"?W:H)*.018));
+      const idx=[];for(let i=(axis==="h"?y0:x0);i<(axis==="h"?y1:x1);i++)if(vals[i]>=threshold)idx.push(i);
+      const groups=[];for(const v of idx){const g=groups[groups.length-1];if(!g||v-g[g.length-1]>4)groups.push([v]);else g.push(v)}
+      for(const g of groups){
+        const coord=g.reduce((a,v)=>a+v,0)/g.length;
+        let min=Infinity,max=-Infinity,count=0,spanMin=Infinity,spanMax=-Infinity;
+        if(axis==="h"){
+          for(let y=Math.max(y0,Math.floor(coord-10));y<=Math.min(y1-1,Math.ceil(coord+10));y++)for(let x=x0;x<x1;x++)if(m[y*W+x]){min=Math.min(min,x);max=Math.max(max,x);spanMin=Math.min(spanMin,y);spanMax=Math.max(spanMax,y);count++}
+        }else{
+          for(let x=Math.max(x0,Math.floor(coord-10));x<=Math.min(x1-1,Math.ceil(coord+10));x++)for(let y=y0;y<y1;y++)if(m[y*W+x]){min=Math.min(min,y);max=Math.max(max,y);spanMin=Math.min(spanMin,x);spanMax=Math.max(spanMax,x);count++}
+        }
+        const len=max-min,span=spanMax-spanMin;
+        if(count<35||len<Math.max(55,(axis==="h"?W:H)*.045)||span>Math.max(55,len*.28))continue;
+        runs.push({color,axis,x:axis==="h"?(min+max)/2:coord,y:axis==="h"?coord:(min+max)/2,pixels:len,confidence:Math.min(.96,.64+Math.min(.28,len/Math.max(W,H)))});
+      }
+    }
+    collect(row,"h");collect(col,"v");
+  }
+  runs.sort((a,b)=>b.pixels-a.pixels);
+  const kept=[];
+  for(const r of runs){
+    const duplicate=kept.some(k=>{
+      if(k.color!==r.color||k.axis!==r.axis)return false;
+      const parallel=Math.abs((r.axis==="h"?r.y:r.x)-(k.axis==="h"?k.y:k.x));
+      const a1=r.axis==="h"?r.x-r.pixels/2:r.y-r.pixels/2,a2=r.axis==="h"?r.x+r.pixels/2:r.y+r.pixels/2;
+      const b1=k.axis==="h"?k.x-k.pixels/2:k.y-k.pixels/2,b2=k.axis==="h"?k.x+k.pixels/2:k.y+k.pixels/2;
+      const overlap=Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));
+      return parallel<28 && overlap/Math.max(1,Math.min(r.pixels,k.pixels))>.45;
+    });
+    if(!duplicate)kept.push(r);
+  }
+  return kept.slice(0,80);
+}
+function bpDefaultScale(){
+  if(bpState.scaleFeetPerPx)return bpState.scaleFeetPerPx;
+  const sel=$("bpScale")?.value||"0.125";
+  if(sel!=="custom"){
+    // The printed scale alone cannot convert camera pixels to feet. Use a calibration
+    // based on the visible sheet width when a standard 24x36 or 30x42 sheet is detected.
+    return null
+  }
+  return null
+}
+function bpScaleChanged(){if($("bpScale").value!=="custom")bpState.scaleFeetPerPx=null;bpRenderCanvas();bpRender()}
+function bpStartCalibration(){if(!bpState.image){alert("Upload a blueprint image first.");return}bpState.calibrating=true;bpState.calPts=[];bpStatus("Calibration mode: tap two points on a known dimension.") ;bpRenderCanvas()}
+function bpResetCalibration(){bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrating=false;bpState.calPts=[];bpRenderCanvas();bpRender()}
+function bpStatus(s){$("bpStatus").textContent=s}
+function bpCanvasPoint(evt){
+  const c=$("bpCanvas"),r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height;
+  return{x:(evt.clientX-r.left)*sx,y:(evt.clientY-r.top)*sy}
+}
+function bpCanvasTap(evt){
+  if(!bpState.calibrating)return;
+  const p=bpCanvasPoint(evt);bpState.calPts.push(p);bpRenderCanvas();
+  if(bpState.calPts.length===2){
+    const ft=Number($("bpCalFt").value)||0;if(ft<=0){alert("Enter the known dimension in feet.");return}
+    const a=bpState.calPts[0],b=bpState.calPts[1],px=Math.hypot(a.x-b.x,a.y-b.y);
+    if(px<5){alert("Those points are too close together.");bpState.calPts=[];bpRenderCanvas();return}
+    bpState.scaleFeetPerPx=ft/px;bpState.calibration={pixels:px,feet:ft};
+    bpState.calibrating=false;bpBuildImageCandidates();bpRenderCanvas();bpRender();
+    bpStatus(`Calibration set: ${ft.toFixed(2)} ft across ${px.toFixed(0)} pixels.`)
+  }
+}
+function bpBuildImageCandidates(){
+  if(!bpState.image)return;
+  const runs=bpDetectRuns(bpState.image.canvas);
+  const scale=bpState.scaleFeetPerPx;
+  bpState.detectedRuns=runs;
+  bpState.candidates=runs.map((r,i)=>{
+    const lf=scale?r.pixels*scale:0;
+    const wallType=r.color==="orange"?"3 5/8 or 6 • Fire Rated":"3 5/8 or 6 • Regular";
+    return{id:"img-"+i,sheet:"Image",name:`${bpColorName(r.color)} wall ${i+1}`,lf:Math.round(lf*12)/12,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:r.color==="orange"?"5/8 Type X":"5/8 Regular",sides:2,color:r.color,confidence:r.confidence,reviewed:false,axis:r.axis,x:r.x,y:r.y,pixels:r.pixels,flag:scale?"":"Needs calibration",wallType}
+  })
+}
+async function bpAnalyzeCurrent(){
+  if(!bpState.image){alert("Upload a blueprint image first.");return}
+  bpStatus("Analyzing image: detecting highlighted wall runs…");
+  bpBuildImageCandidates();
+  try{
+    bpStatus("Running OCR on the blueprint. This can take a little longer on iPhone…");
+    const T=await bpLoadTesseract(), result=await T.recognize(bpState.image.file,"eng",{logger:m=>{if(m.status&&m.progress)bpStatus(`OCR: ${m.status} ${Math.round(m.progress*100)}%`) }});
+    const text=result.data?.text||"",conf=result.data?.confidence||0;
+    bpState.ocrText=text;bpState.ocrConfidence=conf;
+    const cls=bpClassify(text,1);
+    bpState.findings=[
+      {sheet:"Image",finding:"Image analysis",value:`${bpState.detectedRuns?.length||0} highlighted wall runs detected`,confidence:bpConfidence("image-wall",Math.min(1,(bpState.detectedRuns?.length||0)/20)),kind:"image-wall",accepted:true},
+      {sheet:"Image",finding:"Sheet classification",value:cls.type,confidence:bpConfidence("sheet",cls.type),kind:"sheet",accepted:false},
+      ...bpWallTypes(text).map(v=>({sheet:"Image",finding:"Possible wall type",value:v,confidence:bpConfidence("wall-type",v),kind:"wall-type",accepted:false})),
+      ...bpDimensions(text).map(d=>({sheet:"Image",finding:"OCR dimension",value:d.raw,feet:d.feet,confidence:bpConfidence("dimension",d.feet),kind:"dimension",accepted:false})),
+      ...bpOpenings(text).map(o=>({sheet:"Image",finding:o.type,value:o.label,confidence:bpConfidence("opening",o.label),kind:"opening",accepted:false}))
+    ];
+    const rooms=[...new Set((text.match(/\b(?:ROOM|OFFICE|CLASSROOM|CORRIDOR|LOBBY|BREAK ROOM|WORK ROOM|MEN|WOMEN|STO\.?)\s*[A-Z0-9/-]{0,10}/gi)||[]))].slice(0,40);
+    rooms.forEach(v=>bpState.findings.push({sheet:"Image",finding:"Room label",value:v.trim(),confidence:.66,kind:"room",accepted:false}));
+    bpStatus(`Image analysis complete. ${bpState.detectedRuns?.length||0} highlighted wall runs and ${(bpDimensions(text)).length} OCR dimensions found.`);
+  }catch(e){
+    bpState.ocrText="";bpState.ocrConfidence=0;
+    bpState.findings=[{sheet:"Image",finding:"Image wall detection",value:`${bpState.detectedRuns?.length||0} highlighted wall runs`,confidence:.75,kind:"image-wall",accepted:true},{sheet:"Image",finding:"OCR unavailable",value:e.message,confidence:.20,kind:"manual",accepted:false}];
+    bpStatus("Wall-color analysis completed. OCR could not be loaded; wall candidates are still available after calibration.")
+  }
+  bpRenderCanvas();bpRender()
 }
 async function bpLoadImage(file){
-  $("bpStatus").textContent="Image loaded. Browser-only V4 does not guess dimensions from pixels. Use the image as a visual reference and enter verified dimensions, or use a PDF with selectable text.";
-  bpState.pages=[{page:1,text:"Image blueprint uploaded. Manual review required.",type:"Image / Manual Review",useful:"Visual reference"}];
-  bpState.findings=[{sheet:"Image",finding:"Manual review required",value:file.name,confidence:.99,kind:"manual",accepted:false}];
-  bpState.candidates=[];
-  bpRender();
+  bpStatus("Loading blueprint image…");
+  const img=new Image();img.onload=async()=>{
+    const max=1400,scale=Math.min(1,max/img.naturalWidth),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+    const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+    bpState.image={file,img,canvas:c,width:w,height:h};bpState.pages=[{page:1,text:"Image blueprint",type:"Image / Floor Plan",useful:"Highlighted wall detection, OCR, visual review"}];
+    bpState.scaleFeetPerPx=null;bpState.calibrating=false;bpState.calPts=[];bpState.ocrText="";bpState.ocrConfidence=0;
+    bpBuildImageCandidates();bpRenderCanvas();bpRender();
+    await bpAnalyzeCurrent()
+  };img.onerror=()=>bpStatus("Could not load the image.");img.src=URL.createObjectURL(file)
 }
-function clearBlueprint(){bpState={pages:[],findings:[],candidates:[],notes:""};if($("bpNotes"))$("bpNotes").value="";$("bpStatus").textContent="No blueprint loaded.";bpRender();}
-function saveBlueprintNotes(){bpState.notes=$("bpNotes").value;localStorage.setItem("azteca_bp_notes",bpState.notes);alert("Blueprint notes saved on this device.");}
-$("bpFile")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadPdf(f).catch(err=>{$("bpStatus").textContent="Could not read the PDF: "+err.message;});});
-$("bpImage")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadImage(f);});
-window.addEventListener("load",()=>{if($("bpNotes"))$("bpNotes").value=localStorage.getItem("azteca_bp_notes")||"";bpRender();});
+async function bpLoadPdf(file){
+  bpStatus("Reading blueprint PDF…");if(!bpPdfLib){bpStatus("PDF reader is still loading. Check your internet connection and try again.");return}
+  try{const data=await file.arrayBuffer(),pdf=await bpPdfLib.getDocument({data}).promise;bpState.pages=[];bpState.findings=[];bpState.candidates=[];
+    for(let n=1;n<=pdf.numPages;n++){const page=await pdf.getPage(n),tc=await page.getTextContent(),text=tc.items.map(x=>x.str).join(" "),cls=bpClassify(text,n);
+      bpState.pages.push({page:n,text,type:cls.type,useful:cls.useful});
+      bpState.findings.push({sheet:`Page ${n}`,finding:"Sheet classification",value:cls.type,confidence:.95,kind:"sheet",accepted:false});
+      bpWallTypes(text).forEach(v=>bpState.findings.push({sheet:`Page ${n}`,finding:"Possible wall type",value:v,confidence:.86,kind:"wall-type",accepted:false}));
+      bpDimensions(text).forEach(d=>bpState.findings.push({sheet:`Page ${n}`,finding:"Dimension candidate",value:d.raw,feet:d.feet,confidence:.72,kind:"dimension",accepted:false}));
+      bpOpenings(text).forEach(o=>bpState.findings.push({sheet:`Page ${n}`,finding:o.type,value:o.label,confidence:.75,kind:"opening",accepted:false}));
+    }
+    bpStatus(`Loaded ${pdf.numPages} PDF page(s). For photo/scanned pages, export the page as an image and use Upload Image for pixel analysis.`);bpRender()
+  }catch(e){bpStatus("Could not read the PDF: "+e.message)}
+}
+function bpToggleFinding(i){if(!bpState.findings[i])return;bpState.findings[i].accepted=!bpState.findings[i].accepted;bpRender()}
+function bpRenderCanvas(){
+  const c=$("bpCanvas");if(!c)return;
+  if(!bpState.image){c.width=10;c.height=10;c.getContext("2d").clearRect(0,0,10,10);return}
+  const src=bpState.image.canvas;c.width=src.width;c.height=src.height;const ctx=c.getContext("2d");ctx.drawImage(src,0,0);
+  (bpState.detectedRuns||[]).forEach((r,i)=>{ctx.save();ctx.lineWidth=Math.max(3,Math.min(9,src.width/300));ctx.globalAlpha=.85;ctx.strokeStyle=r.color==="green"?"#19a83a":"#f28a00";ctx.beginPath();if(r.axis==="h"){ctx.moveTo(r.x-r.pixels/2,r.y);ctx.lineTo(r.x+r.pixels/2,r.y)}else{ctx.moveTo(r.x,r.y-r.pixels/2);ctx.lineTo(r.x,r.y+r.pixels/2)}ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";ctx.fillText(String(i+1),r.x+5,r.y-5);ctx.restore()});
+  if(bpState.calPts?.length){ctx.fillStyle="#d00";bpState.calPts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fill();ctx.fillText(String(i+1),p.x+9,p.y-9)})}
+}
+function bpRender(){
+  const pages=bpState.pages||[],cand=bpState.candidates||[];
+  $("bpWallCount").textContent=bpState.detectedRuns?.length||0;$("bpOcrConfidence").textContent=bpState.ocrConfidence?Math.round(bpState.ocrConfidence)+"%":"--";
+  $("bpSummary").innerHTML=[["Sheets",pages.length],["Findings",bpState.findings.length],["Wall Candidates",cand.length],["Reviewed",cand.filter(c=>c.reviewed).length]].map(x=>`<div class="card"><span class="muted">${x[0]}</span><div class="metric">${x[1]}</div></div>`).join("");
+  $("bpFindings").innerHTML=bpState.findings.length?bpState.findings.map((f,i)=>`<tr><td>${f.finding}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round((f.confidence||0)*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Use'}</button></td></tr>`).join(""):"<tr><td colspan=4>No findings yet.</td></tr>";
+  $("bpTakeoffRows").innerHTML=cand.length?cand.map((c,i)=>`<tr><td>${bpColorName(c.color)}</td><td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td><td><input type=number step=.083 value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value"></td><td><input type=number step=.5 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value"></td><td><select onchange="bpState.candidates[${i}].stud=this.value">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].gauge=this.value">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].spacing=this.value">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].drywall=this.value">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].sides=+this.value"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td><td>${Math.round(c.confidence*100)}%</td><td><button class="${c.reviewed?'primary':'secondary'}" onclick="bpState.candidates[${i}].reviewed=!bpState.candidates[${i}].reviewed;bpRender()">${c.reviewed?'Reviewed':'Review'}</button>${c.flag?`<div class="muted">${c.flag}</div>`:""}</td><td><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRenderCanvas();bpRender()">Delete</button></td></tr>`).join(""):"<tr><td colspan=12>No wall candidates yet. Upload an image and calibrate the scale.</td></tr>";
+  bpRenderCanvas()
+}
+function bpMarkAllReviewed(){bpState.candidates.forEach(c=>{if(c.lf>0&&c.height>0)c.reviewed=true});bpRender()}
+function bpAddManualCandidate(){bpState.candidates.push({id:"manual-"+Date.now(),sheet:"Manual",name:"Verified Wall",lf:0,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"5/8 Regular",sides:2,color:"green",confidence:.50,reviewed:false,flag:"Manual length"});bpRender()}
+function acceptBlueprintFindings(){
+  const ready=bpState.candidates.filter(c=>c.reviewed&&c.lf>0&&c.height>0);
+  if(!ready.length){alert("Review at least one wall candidate, verify its dimensions and mark it Reviewed before applying it to Areas.");return}
+  const existing=areas.length===1&&areas[0].name==="Interior Walls"&&areas[0].lf===100?[]:areas.slice();
+  areas=existing.concat(ready.map(c=>({name:c.name,lf:c.lf,height:c.height,stud:c.stud,gauge:c.gauge,spacing:c.spacing,drywall:c.drywall,sides:c.sides||2})));
+  render();alert(`${ready.length} reviewed blueprint wall(s) added to Areas. Review them before bidding.`);tab("areas")
+}
+function bpExportCsv(){
+  const rows=[["Sheet","Wall","LF","Height","Stud","Gauge","Spacing","Drywall","Sides","Confidence","Reviewed"]];
+  bpState.candidates.forEach(c=>rows.push([c.sheet,c.name,c.lf,c.height,c.stud,c.gauge,c.spacing,c.drywall,c.sides,Math.round(c.confidence*100)+"%",c.reviewed?"Yes":"No"]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="azteca-blueprint-takeoff.csv";a.click();URL.revokeObjectURL(a.href)
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function escapeAttr(s){return escapeHtml(s)}
+function clearBlueprint(){bpState={pages:[],findings:[],candidates:[],notes:"",image:null,scaleFeetPerPx:null,calibration:null,calibrating:false,calPts:[]};if($("bpNotes"))$("bpNotes").value="";bpStatus("No blueprint loaded.");bpRender()}
+function saveBlueprintNotes(){bpState.notes=$("bpNotes").value;localStorage.setItem("azteca_bp_notes",bpState.notes);alert("Blueprint notes saved on this device.")}
+$("bpFile")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadPdf(f)});
+$("bpImage")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadImage(f)});
+$("bpCanvas")?.addEventListener("click",bpCanvasTap);
+window.addEventListener("load",()=>{if($("bpNotes"))$("bpNotes").value=localStorage.getItem("azteca_bp_notes")||"";bpRender()});
 
 render();if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 </script></body></html>

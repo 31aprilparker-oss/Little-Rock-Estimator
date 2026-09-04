@@ -16,7 +16,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 @media(max-width:700px){#bpTakeoffTableWrap{display:none}.takeoff-cards{display:block}.wall-card .fields{grid-template-columns:1fr 1fr}.wall-card input,.wall-card select{font-size:16px;padding:10px}.takeoff-actions .primary,.takeoff-actions .secondary{flex:1 1 46%}.takeoff-actions .primary{flex-basis:100%}}
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
 </style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.3 Blueprint Takeoff & Image Recognition</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.3.1 Blueprint Takeoff & Image Recognition</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
@@ -51,7 +51,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
       <button class="secondary" onclick="bpResetCalibration()">Reset calibration</button>
     </div>
     <div id="bpViewer" style="position:relative;margin-top:10px;background:#eef2f5;border-radius:10px;overflow:auto;text-align:center;min-height:180px">
-      <canvas id="bpCanvas" style="max-width:100%;height:auto;display:block;margin:auto"></canvas>
+      <canvas id="bpCanvas" style="max-width:100%;height:auto;display:block;margin:auto;touch-action:pan-x pan-y"></canvas>
     </div>
     <p class="muted">Calibration: tap/click two points on the drawing that span a known dimension. This compensates for camera/photo size instead of assuming image pixels equal printed inches.</p>
   </div>
@@ -91,7 +91,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="labor" class="tab"><div class="card"><h2>Labor Production</h2><p class="muted">Editable hours per unit. Validate against your crew's actual production.</p><div class="scroll"><table><thead><tr><th>Work</th><th>Qty</th><th>Unit</th><th>Hrs/Unit</th><th>Hours</th><th>Cost</th></tr></thead><tbody id="laborRows"></tbody></table></div><h2>Total Labor: <span id="laborTotal">$0</span></h2></div></section>
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.3 • Blueprint image recognition + mobile review</footer>
+</main><footer>Azteca Elite Construction Estimator v4.3.1 • Calibration touch fix + mobile review</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[];
@@ -235,8 +235,20 @@ function bpDefaultScale(){
   return null
 }
 function bpScaleChanged(){if($("bpScale").value!=="custom")bpState.scaleFeetPerPx=null;bpRenderCanvas();bpRender()}
-function bpStartCalibration(){if(!bpState.image){alert("Upload a blueprint image first.");return}bpState.calibrating=true;bpState.calPts=[];bpStatus("Calibration mode: tap two points on a known dimension.") ;bpRenderCanvas()}
-function bpResetCalibration(){bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrating=false;bpState.calPts=[];bpRenderCanvas();bpRender()}
+function bpStartCalibration(){
+  if(!bpState.image){alert("Upload a blueprint image first.");return}
+  const ft=Number($("bpCalFt")?.value)||0;
+  if(ft<=0){alert("Enter the known calibration length in feet first.");$("bpCalFt")?.focus();return}
+  bpState.calibrating=true;
+  bpState.calPts=[];
+  const c=$("bpCanvas");
+  if(c){c.style.touchAction="none";c.style.cursor="crosshair"}
+  bpStatus(`Calibration mode: tap the two ends of the ${ft} ft known dimension.`);
+  bpRenderCanvas();
+  const viewer=$("bpViewer");
+  if(viewer){setTimeout(()=>viewer.scrollIntoView({behavior:"smooth",block:"center"}),50)}
+}
+function bpResetCalibration(){bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrating=false;bpState.calPts=[];const c=$("bpCanvas");if(c){c.style.touchAction="pan-x pan-y";c.style.cursor="default"}bpRenderCanvas();bpRender()}
 function bpStatus(s){$("bpStatus").textContent=s}
 function bpCanvasPoint(evt){
   const c=$("bpCanvas"),r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height;
@@ -244,13 +256,17 @@ function bpCanvasPoint(evt){
 }
 function bpCanvasTap(evt){
   if(!bpState.calibrating)return;
+  if(evt.cancelable)evt.preventDefault();
   const p=bpCanvasPoint(evt);bpState.calPts.push(p);bpRenderCanvas();
+  if(bpState.calPts.length===1){bpStatus("First calibration point set. Tap the other end of the known dimension.");return}
   if(bpState.calPts.length===2){
-    const ft=Number($("bpCalFt").value)||0;if(ft<=0){alert("Enter the known dimension in feet.");return}
+    const ft=Number($("bpCalFt").value)||0;if(ft<=0){alert("Enter the known dimension in feet.");bpState.calPts=[];return}
     const a=bpState.calPts[0],b=bpState.calPts[1],px=Math.hypot(a.x-b.x,a.y-b.y);
     if(px<5){alert("Those points are too close together.");bpState.calPts=[];bpRenderCanvas();return}
     bpState.scaleFeetPerPx=ft/px;bpState.calibration={pixels:px,feet:ft};
-    bpState.calibrating=false;bpBuildImageCandidates();bpRenderCanvas();bpRender();
+    bpState.calibrating=false;
+    const c=$("bpCanvas");if(c){c.style.touchAction="pan-x pan-y";c.style.cursor="default"}
+    bpBuildImageCandidates();bpRenderCanvas();bpRender();
     bpStatus(`Calibration set: ${ft.toFixed(2)} ft across ${px.toFixed(0)} pixels.`)
   }
 }
@@ -379,7 +395,10 @@ function clearBlueprint(){bpState={pages:[],findings:[],candidates:[],notes:"",i
 function saveBlueprintNotes(){bpState.notes=$("bpNotes").value;localStorage.setItem("azteca_bp_notes",bpState.notes);alert("Blueprint notes saved on this device.")}
 $("bpFile")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadPdf(f)});
 $("bpImage")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadImage(f)});
-$("bpCanvas")?.addEventListener("click",bpCanvasTap);
+const bpCanvasEl=$("bpCanvas");
+if(bpCanvasEl){
+  bpCanvasEl.addEventListener("pointerup",bpCanvasTap,{passive:false});
+}
 window.addEventListener("load",()=>{if($("bpNotes"))$("bpNotes").value=localStorage.getItem("azteca_bp_notes")||"";bpRender()});
 
 render();if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");

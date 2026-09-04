@@ -16,7 +16,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 @media(max-width:700px){#bpTakeoffTableWrap{display:none}.takeoff-cards{display:block}.wall-card .fields{grid-template-columns:1fr 1fr}.wall-card input,.wall-card select{font-size:16px;padding:10px}.takeoff-actions .primary,.takeoff-actions .secondary{flex:1 1 46%}.takeoff-actions .primary{flex-basis:100%}}
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
 </style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.3.1 Blueprint Takeoff & Image Recognition</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.4 Blueprint Takeoff & Measurement Accuracy</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
@@ -24,7 +24,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="blueprint" class="tab">
   <div class="card">
     <h2>Blueprint Takeoff • Image Recognition</h2>
-    <p class="muted">Upload a PDF or a photo/scan. Images are analyzed locally in the browser for highlighted wall runs, OCR text, dimensions, room labels, and openings. Every wall quantity remains reviewable before it reaches Areas.</p>
+    <p class="muted">Upload a PDF or a photo/scan. Images are analyzed locally in the browser for highlighted straight wall segments, OCR text, dimensions, room labels, and openings. Every wall quantity remains reviewable before it reaches Areas.</p>
     <div class="actions">
       <label class="primary" style="display:inline-block;cursor:pointer">Upload PDF
         <input id="bpFile" type="file" accept=".pdf,application/pdf" style="display:none">
@@ -43,7 +43,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
     <div class="grid">
       <div><label>Scale</label><select id="bpScale" onchange="bpScaleChanged()"><option value="0.125">1/8&quot; = 1'-0&quot;</option><option value="0.0625">1/16&quot; = 1'-0&quot;</option><option value="0.25">1/4&quot; = 1'-0&quot;</option><option value="custom">Custom calibration</option></select></div>
       <div><label>Known calibration length (ft)</label><input id="bpCalFt" type="number" step="0.01" value="10"></div>
-      <div><label>Detected wall runs</label><div class="metric" id="bpWallCount">0</div></div>
+      <div><label>Detected wall segments</label><div class="metric" id="bpWallCount">0</div></div>
       <div><label>OCR confidence</label><div class="metric" id="bpOcrConfidence">--</div></div>
     </div>
     <div class="actions">
@@ -91,7 +91,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="labor" class="tab"><div class="card"><h2>Labor Production</h2><p class="muted">Editable hours per unit. Validate against your crew's actual production.</p><div class="scroll"><table><thead><tr><th>Work</th><th>Qty</th><th>Unit</th><th>Hrs/Unit</th><th>Hours</th><th>Cost</th></tr></thead><tbody id="laborRows"></tbody></table></div><h2>Total Labor: <span id="laborTotal">$0</span></h2></div></section>
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.3.1 • Calibration touch fix + mobile review</footer>
+</main><footer>Azteca Elite Construction Estimator v4.4 • Segment-aware wall measurement</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[];
@@ -172,6 +172,15 @@ function bpParseFeet(s){
   m=x.match(/(\d+(?:\.\d+)?)/); return m?+m[1]:0
 }
 function bpColorName(c){return c==="green"?"Green":"Orange"}
+function bpRoundFeet(v){return Math.round((Number(v)||0)*96)/96}
+function bpFormatFeet(v){
+  let feet=Math.max(0,Number(v)||0),whole=Math.floor(feet),inches=(feet-whole)*12;
+  let sixteenths=Math.round(inches*16),inchWhole=Math.floor(sixteenths/16),frac=sixteenths%16;
+  if(inchWhole>=12){whole+=1;inchWhole-=12}
+  const gcd=(a,b)=>b?gcd(b,a%b):a; let fracTxt="";
+  if(frac){const g=gcd(frac,16);fracTxt=` ${frac/g}/${16/g}`}
+  return `${whole}'-${inchWhole}${fracTxt}\"`;
+}
 function bpPixelColor(r,g,b){
   if(g>92 && g>r*1.15 && g>b*1.12 && g-r>22)return"green";
   if(r>135 && r>g*1.18 && g>45 && g<205 && b<125 && r-b>75)return"orange";
@@ -181,48 +190,110 @@ function bpDetectRuns(canvas){
   const ctx=canvas.getContext("2d",{willReadFrequently:true}),W=canvas.width,H=canvas.height;
   const img=ctx.getImageData(0,0,W,H),d=img.data;
   const y0=Math.floor(H*.12),y1=Math.floor(H*.80),x0=Math.floor(W*.015),x1=Math.floor(W*.985);
-  const mask={green:new Uint8Array(W*H),orange:new Uint8Array(W*H)};
+  const masks={green:new Uint8Array(W*H),orange:new Uint8Array(W*H)};
   for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
-    const i=(y*W+x)*4,r=d[i],g=d[i+1],b=d[i+2],c=bpPixelColor(r,g,b);
-    if(c)mask[c][y*W+x]=1;
+    const i=(y*W+x)*4,c=bpPixelColor(d[i],d[i+1],d[i+2]);
+    if(c)masks[c][y*W+x]=1;
   }
-  const runs=[];
+  const result=[];
+  const fillSmallGaps=(a,maxGap)=>{
+    let last=-1;
+    for(let i=0;i<a.length;i++)if(a[i]){
+      if(last>=0&&i-last-1<=maxGap)for(let j=last+1;j<i;j++)a[j]=1;
+      last=i;
+    }
+  };
+  const spansFromProfile=(profile,minLen,offset)=>{
+    const out=[];let st=-1;
+    for(let i=0;i<=profile.length;i++){
+      const on=i<profile.length&&profile[i];
+      if(on&&st<0)st=i;
+      if(!on&&st>=0){if(i-st>=minLen)out.push([st+offset,i-1+offset]);st=-1}
+    }
+    return out;
+  };
   for(const color of ["green","orange"]){
-    const m=mask[color], row=new Int32Array(H), col=new Int32Array(W);
-    for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++)if(m[y*W+x]){row[y]++;col[x]++}
-    function collect(vals,axis){
-      const threshold=Math.max(12,Math.floor((axis==="h"?W:H)*.018));
-      const idx=[];for(let i=(axis==="h"?y0:x0);i<(axis==="h"?y1:x1);i++)if(vals[i]>=threshold)idx.push(i);
-      const groups=[];for(const v of idx){const g=groups[groups.length-1];if(!g||v-g[g.length-1]>4)groups.push([v]);else g.push(v)}
-      for(const g of groups){
-        const coord=g.reduce((a,v)=>a+v,0)/g.length;
-        let min=Infinity,max=-Infinity,count=0,spanMin=Infinity,spanMax=-Infinity;
-        if(axis==="h"){
-          for(let y=Math.max(y0,Math.floor(coord-10));y<=Math.min(y1-1,Math.ceil(coord+10));y++)for(let x=x0;x<x1;x++)if(m[y*W+x]){min=Math.min(min,x);max=Math.max(max,x);spanMin=Math.min(spanMin,y);spanMax=Math.max(spanMax,y);count++}
-        }else{
-          for(let x=Math.max(x0,Math.floor(coord-10));x<=Math.min(x1-1,Math.ceil(coord+10));x++)for(let y=y0;y<y1;y++)if(m[y*W+x]){min=Math.min(min,y);max=Math.max(max,y);spanMin=Math.min(spanMin,x);spanMax=Math.max(spanMax,x);count++}
+    const m=masks[color];
+    for(const axis of ["h","v"]){
+      const crossStart=axis==="h"?y0:x0,crossEnd=axis==="h"?y1:x1;
+      const alongStart=axis==="h"?x0:y0,alongEnd=axis==="h"?x1:y1;
+      const crossLen=crossEnd-crossStart,alongLen=alongEnd-alongStart;
+      const support=new Int32Array(crossLen);
+      for(let c=0;c<crossLen;c++){
+        const coord=c+crossStart;let n=0;
+        if(axis==="h")for(let x=alongStart;x<alongEnd;x++)n+=m[coord*W+x];
+        else for(let y=alongStart;y<alongEnd;y++)n+=m[y*W+coord];
+        support[c]=n;
+      }
+      const bandThreshold=Math.max(10,Math.floor(alongLen*.012));
+      const bands=[];let bs=-1;
+      for(let i=0;i<=crossLen;i++){
+        const on=i<crossLen&&support[i]>=bandThreshold;
+        if(on&&bs<0)bs=i;
+        if(!on&&bs>=0){
+          if(i-bs<=34){bands.push([bs+crossStart,i-1+crossStart])}
+          else{
+            // Thick/highlighter blobs can merge nearby rows. Split into 16px slices so corners do not become one giant run.
+            for(let q=bs+crossStart;q<i+crossStart;q+=16)bands.push([q,Math.min(i-1+crossStart,q+15)]);
+          }
+          bs=-1;
         }
-        const len=max-min,span=spanMax-spanMin;
-        if(count<35||len<Math.max(55,(axis==="h"?W:H)*.045)||span>Math.max(55,len*.28))continue;
-        runs.push({color,axis,x:axis==="h"?(min+max)/2:coord,y:axis==="h"?coord:(min+max)/2,pixels:len,confidence:Math.min(.96,.64+Math.min(.28,len/Math.max(W,H)))});
+      }
+      for(const [b0,b1] of bands){
+        const pad=3,lo=Math.max(crossStart,b0-pad),hi=Math.min(crossEnd-1,b1+pad);
+        const profile=new Uint8Array(alongLen),strength=new Int16Array(alongLen);
+        for(let a=alongStart;a<alongEnd;a++){
+          let n=0;
+          if(axis==="h")for(let y=lo;y<=hi;y++)n+=m[y*W+a];
+          else for(let x=lo;x<=hi;x++)n+=m[a*W+x];
+          strength[a-alongStart]=n;
+          if(n>=2)profile[a-alongStart]=1;
+        }
+        fillSmallGaps(profile,Math.max(4,Math.round(alongLen*.006)));
+        const minSeg=Math.max(24,Math.round(alongLen*.025));
+        for(const [a0,a1] of spansFromProfile(profile,minSeg,alongStart)){
+          let sumCross=0,count=0,hit=0;
+          for(let a=a0;a<=a1;a++){
+            if(axis==="h")for(let y=lo;y<=hi;y++)if(m[y*W+a]){sumCross+=y;count++;hit++}
+            else for(let x=lo;x<=hi;x++)if(m[a*W+x]){sumCross+=x;count++;hit++}
+          }
+          if(count<24)continue;
+          const coord=sumCross/count,pixels=a1-a0+1,density=hit/Math.max(1,pixels*(hi-lo+1));
+          if(density<.055)continue;
+          const conf=Math.max(.62,Math.min(.95,.70+density*.34+Math.min(.12,pixels/alongLen*.18)));
+          result.push({color,axis,x:axis==="h"?(a0+a1)/2:coord,y:axis==="h"?coord:(a0+a1)/2,pixels,confidence:conf,start:a0,end:a1,density});
+        }
       }
     }
-    collect(row,"h");collect(col,"v");
   }
-  runs.sort((a,b)=>b.pixels-a.pixels);
+  // Collapse detections caused by the thickness of the same highlighted stroke.
+  result.sort((a,b)=>b.pixels-a.pixels);
   const kept=[];
-  for(const r of runs){
+  for(const r of result){
     const duplicate=kept.some(k=>{
       if(k.color!==r.color||k.axis!==r.axis)return false;
       const parallel=Math.abs((r.axis==="h"?r.y:r.x)-(k.axis==="h"?k.y:k.x));
-      const a1=r.axis==="h"?r.x-r.pixels/2:r.y-r.pixels/2,a2=r.axis==="h"?r.x+r.pixels/2:r.y+r.pixels/2;
-      const b1=k.axis==="h"?k.x-k.pixels/2:k.y-k.pixels/2,b2=k.axis==="h"?k.x+k.pixels/2:k.y+k.pixels/2;
-      const overlap=Math.max(0,Math.min(a2,b2)-Math.max(a1,b1));
-      return parallel<28 && overlap/Math.max(1,Math.min(r.pixels,k.pixels))>.45;
+      const a1=r.start,a2=r.end,b1=k.start,b2=k.end;
+      const overlap=Math.max(0,Math.min(a2,b2)-Math.max(a1,b1)+1),shorter=Math.max(1,Math.min(a2-a1+1,b2-b1+1));
+      return parallel<18&&overlap/shorter>.72;
     });
     if(!duplicate)kept.push(r);
   }
-  return kept.slice(0,80);
+  // Merge truly collinear fragments separated only by tiny breaks, but keep corners/intersections as separate segments.
+  kept.sort((a,b)=>a.color.localeCompare(b.color)||a.axis.localeCompare(b.axis)||(a.axis==="h"?a.y-b.y:a.x-b.x)||a.start-b.start);
+  const merged=[];
+  for(const r of kept){
+    const prev=merged[merged.length-1];
+    const same=prev&&prev.color===r.color&&prev.axis===r.axis&&Math.abs((r.axis==="h"?r.y:r.x)-(prev.axis==="h"?prev.y:prev.x))<10;
+    const gap=same?r.start-prev.end-1:999;
+    if(same&&gap>=0&&gap<=10){
+      const start=Math.min(prev.start,r.start),end=Math.max(prev.end,r.end),pixels=end-start+1;
+      prev.start=start;prev.end=end;prev.pixels=pixels;
+      if(prev.axis==="h")prev.x=(start+end)/2;else prev.y=(start+end)/2;
+      prev.confidence=Math.min(prev.confidence,r.confidence);
+    }else merged.push({...r});
+  }
+  return merged.filter(r=>r.pixels>=Math.max(24,(r.axis==="h"?W:H)*.02)).slice(0,120);
 }
 function bpDefaultScale(){
   if(bpState.scaleFeetPerPx)return bpState.scaleFeetPerPx;
@@ -276,14 +347,14 @@ function bpBuildImageCandidates(){
   const scale=bpState.scaleFeetPerPx;
   bpState.detectedRuns=runs;
   bpState.candidates=runs.map((r,i)=>{
-    const lf=scale?r.pixels*scale:0;
+    const lf=scale?bpRoundFeet(r.pixels*scale):0;
     const wallType=r.color==="orange"?"3 5/8 or 6 • Fire Rated":"3 5/8 or 6 • Regular";
-    return{id:"img-"+i,sheet:"Image",name:`${bpColorName(r.color)} wall ${i+1}`,lf:Math.round(lf*12)/12,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:r.color==="orange"?"5/8 Type X":"5/8 Regular",sides:2,color:r.color,confidence:r.confidence,reviewed:false,axis:r.axis,x:r.x,y:r.y,pixels:r.pixels,flag:scale?"":"Needs calibration",wallType}
+    return{id:"img-"+i,sheet:"Image",name:`${bpColorName(r.color)} segment ${i+1}`,lf,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:r.color==="orange"?"5/8 Type X":"5/8 Regular",sides:2,color:r.color,confidence:r.confidence,reviewed:false,axis:r.axis,x:r.x,y:r.y,pixels:r.pixels,flag:scale?"":"Needs calibration",wallType}
   })
 }
 async function bpAnalyzeCurrent(){
   if(!bpState.image){alert("Upload a blueprint image first.");return}
-  bpStatus("Analyzing image: detecting highlighted wall runs…");
+  bpStatus("Analyzing image: detecting highlighted straight wall segments…");
   bpBuildImageCandidates();
   try{
     bpStatus("Running OCR on the blueprint. This can take a little longer on iPhone…");
@@ -292,7 +363,7 @@ async function bpAnalyzeCurrent(){
     bpState.ocrText=text;bpState.ocrConfidence=conf;
     const cls=bpClassify(text,1);
     bpState.findings=[
-      {sheet:"Image",finding:"Image analysis",value:`${bpState.detectedRuns?.length||0} highlighted wall runs detected`,confidence:bpConfidence("image-wall",Math.min(1,(bpState.detectedRuns?.length||0)/20)),kind:"image-wall",accepted:true},
+      {sheet:"Image",finding:"Image analysis",value:`${bpState.detectedRuns?.length||0} highlighted straight wall segments detected`,confidence:bpConfidence("image-wall",Math.min(1,(bpState.detectedRuns?.length||0)/20)),kind:"image-wall",accepted:true},
       {sheet:"Image",finding:"Sheet classification",value:cls.type,confidence:bpConfidence("sheet",cls.type),kind:"sheet",accepted:false},
       ...bpWallTypes(text).map(v=>({sheet:"Image",finding:"Possible wall type",value:v,confidence:bpConfidence("wall-type",v),kind:"wall-type",accepted:false})),
       ...bpDimensions(text).map(d=>({sheet:"Image",finding:"OCR dimension",value:d.raw,feet:d.feet,confidence:bpConfidence("dimension",d.feet),kind:"dimension",accepted:false})),
@@ -300,10 +371,10 @@ async function bpAnalyzeCurrent(){
     ];
     const rooms=[...new Set((text.match(/\b(?:ROOM|OFFICE|CLASSROOM|CORRIDOR|LOBBY|BREAK ROOM|WORK ROOM|MEN|WOMEN|STO\.?)\s*[A-Z0-9/-]{0,10}/gi)||[]))].slice(0,40);
     rooms.forEach(v=>bpState.findings.push({sheet:"Image",finding:"Room label",value:v.trim(),confidence:.66,kind:"room",accepted:false}));
-    bpStatus(`Image analysis complete. ${bpState.detectedRuns?.length||0} highlighted wall runs and ${(bpDimensions(text)).length} OCR dimensions found.`);
+    bpStatus(`Image analysis complete. ${bpState.detectedRuns?.length||0} highlighted straight wall segments and ${(bpDimensions(text)).length} OCR dimensions found.`);
   }catch(e){
     bpState.ocrText="";bpState.ocrConfidence=0;
-    bpState.findings=[{sheet:"Image",finding:"Image wall detection",value:`${bpState.detectedRuns?.length||0} highlighted wall runs`,confidence:.75,kind:"image-wall",accepted:true},{sheet:"Image",finding:"OCR unavailable",value:e.message,confidence:.20,kind:"manual",accepted:false}];
+    bpState.findings=[{sheet:"Image",finding:"Image wall detection",value:`${bpState.detectedRuns?.length||0} highlighted straight wall segments`,confidence:.75,kind:"image-wall",accepted:true},{sheet:"Image",finding:"OCR unavailable",value:e.message,confidence:.20,kind:"manual",accepted:false}];
     bpStatus("Wall-color analysis completed. OCR could not be loaded; wall candidates are still available after calibration.")
   }
   bpRenderCanvas();bpRender()
@@ -337,7 +408,7 @@ function bpRenderCanvas(){
   const c=$("bpCanvas");if(!c)return;
   if(!bpState.image){c.width=10;c.height=10;c.getContext("2d").clearRect(0,0,10,10);return}
   const src=bpState.image.canvas;c.width=src.width;c.height=src.height;const ctx=c.getContext("2d");ctx.drawImage(src,0,0);
-  (bpState.detectedRuns||[]).forEach((r,i)=>{ctx.save();ctx.lineWidth=Math.max(3,Math.min(9,src.width/300));ctx.globalAlpha=.85;ctx.strokeStyle=r.color==="green"?"#19a83a":"#f28a00";ctx.beginPath();if(r.axis==="h"){ctx.moveTo(r.x-r.pixels/2,r.y);ctx.lineTo(r.x+r.pixels/2,r.y)}else{ctx.moveTo(r.x,r.y-r.pixels/2);ctx.lineTo(r.x,r.y+r.pixels/2)}ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";ctx.fillText(String(i+1),r.x+5,r.y-5);ctx.restore()});
+  (bpState.detectedRuns||[]).forEach((r,i)=>{ctx.save();ctx.lineWidth=Math.max(3,Math.min(9,src.width/300));ctx.globalAlpha=.85;ctx.strokeStyle=r.color==="green"?"#19a83a":"#f28a00";ctx.beginPath();if(r.axis==="h"){ctx.moveTo(r.start??(r.x-r.pixels/2),r.y);ctx.lineTo(r.end??(r.x+r.pixels/2),r.y)}else{ctx.moveTo(r.x,r.start??(r.y-r.pixels/2));ctx.lineTo(r.x,r.end??(r.y+r.pixels/2))}ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";ctx.fillText(String(i+1),r.x+5,r.y-5);ctx.restore()});
   if(bpState.calPts?.length){ctx.fillStyle="#d00";bpState.calPts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fill();ctx.fillText(String(i+1),p.x+9,p.y-9)})}
 }
 function bpIsManualCandidate(c){return c&&c.sheet==="Manual"}
@@ -345,7 +416,7 @@ function bpCandidateCanReview(c){return !!(c&&c.lf>0&&c.height>0&&(bpState.scale
 function bpSetReviewed(i,value){const c=bpState.candidates[i];if(!c)return;if(value&&!bpCandidateCanReview(c)){if(!bpState.scaleFeetPerPx&&!bpIsManualCandidate(c)){alert("Calibrate the blueprint first. Wall length cannot be verified from image pixels until a known drawing dimension is calibrated.");}else{alert("Enter a verified wall length and height before marking this wall Reviewed.");}return}c.reviewed=!!value;bpRender()}
 function bpCandidateFields(c,i){return `
   <div class="full"><label>Area / Wall</label><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></div>
-  <div><label>Wall LF</label><input type="number" step=".083" value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></div>
+  <div><label>Wall LF</label><input type="number" step=".001" value="${Number(c.lf||0).toFixed(3)}" onchange="bpState.candidates[${i}].lf=bpRoundFeet(+this.value);bpState.candidates[${i}].reviewed=false;bpRender()"><div class="muted" style="margin-top:4px">${c.lf>0?bpFormatFeet(c.lf):"Not measured"}</div></div>
   <div><label>Height</label><input type="number" step=".5" value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></div>
   <div><label>Stud</label><select onchange="bpState.candidates[${i}].stud=this.value;bpState.candidates[${i}].reviewed=false;bpRender()">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></div>
   <div><label>Gauge</label><select onchange="bpState.candidates[${i}].gauge=this.value;bpState.candidates[${i}].reviewed=false;bpRender()">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></div>
@@ -361,8 +432,8 @@ function bpRender(){
   $("bpFindings").innerHTML=bpState.findings.length?bpState.findings.map((f,i)=>`<tr><td>${f.finding}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round((f.confidence||0)*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Use'}</button></td></tr>`).join(""):"<tr><td colspan=4>No findings yet.</td></tr>";
   const imageCandidates=cand.filter(c=>!bpIsManualCandidate(c)), calibrated=!!bpState.scaleFeetPerPx;
   const banner=$("bpCalibrationBanner");
-  if(banner){if(!imageCandidates.length){banner.className="cal-banner";banner.innerHTML="<div class='cal-title'>No image walls waiting for calibration</div><div class='muted'>Upload an image or add a wall manually.</div>"}else if(!calibrated){banner.className="cal-banner warn";banner.innerHTML=`<div class="cal-title">Calibration required before review</div><div>${imageCandidates.length} image wall candidate(s) were detected, but their LF cannot be verified yet.</div><div class="muted" style="margin-top:4px">Enter a known dimension above, tap <b>Calibrate from two points</b>, then tap the two ends of that dimension on the drawing.</div><div class="actions"><button class="primary" onclick="bpStartCalibration()">Calibrate now</button></div>`}else{const fpp=bpState.scaleFeetPerPx;banner.className="cal-banner ready";banner.innerHTML=`<div class="cal-title">✓ Scale calibrated</div><div>${bpState.calibration?`${bpState.calibration.feet} ft = ${Math.round(bpState.calibration.pixels)} image px`:"Image scale is calibrated"}. Wall LF values are now available for review.</div><div class="muted">${fpp.toFixed(5)} ft/px</div>`}}
-  $("bpTakeoffRows").innerHTML=cand.length?cand.map((c,i)=>{const can=bpCandidateCanReview(c),scaleOk=!!bpState.scaleFeetPerPx||bpIsManualCandidate(c);return `<tr><td>${bpColorName(c.color)}</td><td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td><td><input type=number step=.083 value="${c.lf}" onchange="bpState.candidates[${i}].lf=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></td><td><input type=number step=.5 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></td><td><select onchange="bpState.candidates[${i}].stud=this.value;bpState.candidates[${i}].reviewed=false">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].gauge=this.value;bpState.candidates[${i}].reviewed=false">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].spacing=this.value;bpState.candidates[${i}].reviewed=false">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].drywall=this.value;bpState.candidates[${i}].reviewed=false">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].sides=+this.value;bpState.candidates[${i}].reviewed=false"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td><td>${Math.round(c.confidence*100)}%</td><td><button class="${c.reviewed?'primary':'secondary'} ${(!can&&!c.reviewed)?'is-disabled':''}" onclick="bpSetReviewed(${i},${!c.reviewed})">${c.reviewed?'Reviewed':'Review'}</button><div class="muted">${c.reviewed?'Ready':!scaleOk?'Needs calibration':can?'Ready to review':'Verify dimensions'}</div></td><td><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRenderCanvas();bpRender()">Delete</button></td></tr>`}).join(""):"<tr><td colspan=12>No wall candidates yet. Upload an image and calibrate the scale.</td></tr>";
+  if(banner){if(!imageCandidates.length){banner.className="cal-banner";banner.innerHTML="<div class='cal-title'>No image walls waiting for calibration</div><div class='muted'>Upload an image or add a wall manually.</div>"}else if(!calibrated){banner.className="cal-banner warn";banner.innerHTML=`<div class="cal-title">Calibration required before review</div><div>${imageCandidates.length} image wall candidate(s) were detected, but their LF cannot be verified yet.</div><div class="muted" style="margin-top:4px">Enter a known dimension above, tap <b>Calibrate from two points</b>, then tap the two ends of that dimension on the drawing.</div><div class="actions"><button class="primary" onclick="bpStartCalibration()">Calibrate now</button></div>`}else{const fpp=bpState.scaleFeetPerPx;banner.className="cal-banner ready";banner.innerHTML=`<div class="cal-title">✓ Scale calibrated</div><div>${bpState.calibration?`${bpState.calibration.feet} ft = ${Math.round(bpState.calibration.pixels)} image px`:"Image scale is calibrated"}. Straight-segment LF values are now available for review. Corners and intersecting runs are kept as separate candidates.</div><div class="muted">${fpp.toFixed(5)} ft/px</div>`}}
+  $("bpTakeoffRows").innerHTML=cand.length?cand.map((c,i)=>{const can=bpCandidateCanReview(c),scaleOk=!!bpState.scaleFeetPerPx||bpIsManualCandidate(c);return `<tr><td>${bpColorName(c.color)}</td><td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td><td><input type=number step=.001 value="${Number(c.lf||0).toFixed(3)}" onchange="bpState.candidates[${i}].lf=bpRoundFeet(+this.value);bpState.candidates[${i}].reviewed=false;bpRender()"><div class="muted">${c.lf>0?bpFormatFeet(c.lf):"Not measured"}</div></td><td><input type=number step=.5 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></td><td><select onchange="bpState.candidates[${i}].stud=this.value;bpState.candidates[${i}].reviewed=false">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].gauge=this.value;bpState.candidates[${i}].reviewed=false">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].spacing=this.value;bpState.candidates[${i}].reviewed=false">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].drywall=this.value;bpState.candidates[${i}].reviewed=false">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].sides=+this.value;bpState.candidates[${i}].reviewed=false"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td><td>${Math.round(c.confidence*100)}%</td><td><button class="${c.reviewed?'primary':'secondary'} ${(!can&&!c.reviewed)?'is-disabled':''}" onclick="bpSetReviewed(${i},${!c.reviewed})">${c.reviewed?'Reviewed':'Review'}</button><div class="muted">${c.reviewed?'Ready':!scaleOk?'Needs calibration':can?'Ready to review':'Verify dimensions'}</div></td><td><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRenderCanvas();bpRender()">Delete</button></td></tr>`}).join(""):"<tr><td colspan=12>No wall candidates yet. Upload an image and calibrate the scale.</td></tr>";
   bpRenderMobileCards(cand);
   const mark=$("bpMarkAllBtn"),apply=$("bpApplyBtn");if(mark){mark.classList.toggle("is-disabled",imageCandidates.length>0&&!calibrated)}if(apply){const ready=cand.filter(c=>c.reviewed&&c.lf>0&&c.height>0);apply.textContent=ready.length?`Add reviewed walls to Areas (${ready.length})`:"Add reviewed walls to Areas"}
   bpRenderCanvas()

@@ -16,7 +16,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 @media(max-width:700px){#bpTakeoffTableWrap{display:none}.takeoff-cards{display:block}.wall-card .fields{grid-template-columns:1fr 1fr}.wall-card input,.wall-card select{font-size:16px;padding:10px}.takeoff-actions .primary,.takeoff-actions .secondary{flex:1 1 46%}.takeoff-actions .primary{flex-basis:100%}}
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
 </style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.4 Blueprint Takeoff & Measurement Accuracy</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.5 Blueprint Takeoff & Photo Correction</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
@@ -47,13 +47,14 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
       <div><label>OCR confidence</label><div class="metric" id="bpOcrConfidence">--</div></div>
     </div>
     <div class="actions">
-      <button class="secondary" onclick="bpStartCalibration()">Calibrate from two points</button>
-      <button class="secondary" onclick="bpResetCalibration()">Reset calibration</button>
+      <button class="secondary" onclick="bpStartCalibration()">Add calibration from two points</button>
+      <button class="secondary" onclick="bpResetCalibration()">Reset calibrations</button>
     </div>
+    <div id="bpCalSummary" class="muted" style="margin-top:8px">No calibration points yet.</div>
     <div id="bpViewer" style="position:relative;margin-top:10px;background:#eef2f5;border-radius:10px;overflow:auto;text-align:center;min-height:180px">
       <canvas id="bpCanvas" style="max-width:100%;height:auto;display:block;margin:auto;touch-action:pan-x pan-y"></canvas>
     </div>
-    <p class="muted">Calibration: tap/click two points on the drawing that span a known dimension. This compensates for camera/photo size instead of assuming image pixels equal printed inches.</p>
+    <p class="muted">Calibration: add one or more known dimensions from different parts of the drawing. V4.5 uses the nearest calibration measurements to compensate for photo/paper distortion. For best results, use long printed dimensions near opposite sides of the plan.</p>
   </div>
 
   <div class="card">
@@ -91,7 +92,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="labor" class="tab"><div class="card"><h2>Labor Production</h2><p class="muted">Editable hours per unit. Validate against your crew's actual production.</p><div class="scroll"><table><thead><tr><th>Work</th><th>Qty</th><th>Unit</th><th>Hrs/Unit</th><th>Hours</th><th>Cost</th></tr></thead><tbody id="laborRows"></tbody></table></div><h2>Total Labor: <span id="laborTotal">$0</span></h2></div></section>
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.4 • Segment-aware wall measurement</footer>
+</main><footer>Azteca Elite Construction Estimator v4.5 • Gap-aware reconstruction + multi-point calibration</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[];
@@ -121,7 +122,7 @@ document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>tab(b.dataset.t
 const BP_PDF_URL="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
 const BP_TESS_URL="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
 let bpPdfLib=null,bpTesseract=null;
-let bpState={pages:[],findings:[],candidates:[],notes:localStorage.getItem("azteca_bp_notes")||"",image:null,scaleFeetPerPx:null,calibration:null,calibrating:false,calPts:[]};
+let bpState={pages:[],findings:[],candidates:[],notes:localStorage.getItem("azteca_bp_notes")||"",image:null,scaleFeetPerPx:null,calibration:null,calibrations:[],calibrating:false,calPts:[]};
 
 (async()=>{try{const m=await import(BP_PDF_URL);bpPdfLib=m; }catch(e){console.warn("PDF reader unavailable",e)}})();
 async function bpLoadTesseract(){
@@ -279,21 +280,43 @@ function bpDetectRuns(canvas){
     });
     if(!duplicate)kept.push(r);
   }
-  // Merge truly collinear fragments separated only by tiny breaks, but keep corners/intersections as separate segments.
+  // V4.5: reconstruct collinear walls across normal plan interruptions such as door symbols,
+  // labels, intersections and weak highlighter. 90-degree turns remain separate because axes differ.
   kept.sort((a,b)=>a.color.localeCompare(b.color)||a.axis.localeCompare(b.axis)||(a.axis==="h"?a.y-b.y:a.x-b.x)||a.start-b.start);
   const merged=[];
   for(const r of kept){
-    const prev=merged[merged.length-1];
-    const same=prev&&prev.color===r.color&&prev.axis===r.axis&&Math.abs((r.axis==="h"?r.y:r.x)-(prev.axis==="h"?prev.y:prev.x))<10;
-    const gap=same?r.start-prev.end-1:999;
-    if(same&&gap>=0&&gap<=10){
-      const start=Math.min(prev.start,r.start),end=Math.max(prev.end,r.end),pixels=end-start+1;
-      prev.start=start;prev.end=end;prev.pixels=pixels;
-      if(prev.axis==="h")prev.x=(start+end)/2;else prev.y=(start+end)/2;
-      prev.confidence=Math.min(prev.confidence,r.confidence);
-    }else merged.push({...r});
+    let target=null,bestGap=Infinity;
+    for(let j=merged.length-1;j>=0;j--){
+      const m=merged[j];
+      if(m.color!==r.color||m.axis!==r.axis)continue;
+      const centerDelta=Math.abs((r.axis==="h"?r.y:r.x)-(m.axis==="h"?m.y:m.x));
+      if(centerDelta>12)continue;
+      const gap=r.start-m.end-1;
+      const maxGap=Math.max(18,Math.min(70,Math.round((r.axis==="h"?W:H)*.045)));
+      if(gap>=0&&gap<=maxGap&&gap<bestGap){target=m;bestGap=gap}
+    }
+    if(target){
+      const oldPixels=target.pixels,start=Math.min(target.start,r.start),end=Math.max(target.end,r.end);
+      target.start=start;target.end=end;target.pixels=end-start+1;target.gaps=(target.gaps||0)+1;target.gapPixels=(target.gapPixels||0)+bestGap;
+      if(target.axis==="h"){target.x=(start+end)/2;target.y=(target.y*oldPixels+r.y*r.pixels)/(oldPixels+r.pixels)}
+      else{target.y=(start+end)/2;target.x=(target.x*oldPixels+r.x*r.pixels)/(oldPixels+r.pixels)}
+      target.confidence=Math.max(.58,Math.min(target.confidence,r.confidence)-Math.min(.12,bestGap/500));
+    }else merged.push({...r,gaps:0,gapPixels:0});
   }
   return merged.filter(r=>r.pixels>=Math.max(24,(r.axis==="h"?W:H)*.02)).slice(0,120);
+}
+function bpScaleAt(x,y){
+  const cs=bpState.calibrations||[];
+  if(!cs.length)return bpState.scaleFeetPerPx||null;
+  if(cs.length===1)return cs[0].feetPerPx;
+  let num=0,den=0;
+  for(const c of cs){const d=Math.max(25,Math.hypot(x-c.x,y-c.y)),w=1/(d*d);num+=w*c.feetPerPx;den+=w}
+  return den?num/den:null
+}
+function bpRefreshScaleSummary(){
+  const el=$("bpCalSummary");if(!el)return;const cs=bpState.calibrations||[];
+  if(!cs.length){el.textContent="No calibration points yet.";return}
+  el.innerHTML=`<b>${cs.length} calibration${cs.length===1?"":"s"}</b> • ${cs.map((c,i)=>`C${i+1}: ${c.feet} ft / ${Math.round(c.pixels)} px`).join(" • ")}${cs.length<2?" • Add another known dimension elsewhere on the plan for photo-distortion correction.":" • Local scale correction active."}`
 }
 function bpDefaultScale(){
   if(bpState.scaleFeetPerPx)return bpState.scaleFeetPerPx;
@@ -319,7 +342,7 @@ function bpStartCalibration(){
   const viewer=$("bpViewer");
   if(viewer){setTimeout(()=>viewer.scrollIntoView({behavior:"smooth",block:"center"}),50)}
 }
-function bpResetCalibration(){bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrating=false;bpState.calPts=[];const c=$("bpCanvas");if(c){c.style.touchAction="pan-x pan-y";c.style.cursor="default"}bpRenderCanvas();bpRender()}
+function bpResetCalibration(){bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrations=[];bpState.calibrating=false;bpState.calPts=[];const c=$("bpCanvas");if(c){c.style.touchAction="pan-x pan-y";c.style.cursor="default"}bpRenderCanvas();bpRender()}
 function bpStatus(s){$("bpStatus").textContent=s}
 function bpCanvasPoint(evt){
   const c=$("bpCanvas"),r=c.getBoundingClientRect(),sx=c.width/r.width,sy=c.height/r.height;
@@ -334,11 +357,14 @@ function bpCanvasTap(evt){
     const ft=Number($("bpCalFt").value)||0;if(ft<=0){alert("Enter the known dimension in feet.");bpState.calPts=[];return}
     const a=bpState.calPts[0],b=bpState.calPts[1],px=Math.hypot(a.x-b.x,a.y-b.y);
     if(px<5){alert("Those points are too close together.");bpState.calPts=[];bpRenderCanvas();return}
-    bpState.scaleFeetPerPx=ft/px;bpState.calibration={pixels:px,feet:ft};
+    const fpp=ft/px,mid={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    bpState.calibrations=bpState.calibrations||[];bpState.calibrations.push({pixels:px,feet:ft,feetPerPx:fpp,x:mid.x,y:mid.y,a,b});
+    bpState.scaleFeetPerPx=bpState.calibrations.reduce((sum,c)=>sum+c.feetPerPx,0)/bpState.calibrations.length;
+    bpState.calibration={pixels:px,feet:ft};
     bpState.calibrating=false;
     const c=$("bpCanvas");if(c){c.style.touchAction="pan-x pan-y";c.style.cursor="default"}
     bpBuildImageCandidates();bpRenderCanvas();bpRender();
-    bpStatus(`Calibration set: ${ft.toFixed(2)} ft across ${px.toFixed(0)} pixels.`)
+    bpRefreshScaleSummary();bpStatus(`Calibration ${bpState.calibrations.length} set: ${ft.toFixed(2)} ft across ${px.toFixed(0)} pixels. ${bpState.calibrations.length<2?"Add another known dimension elsewhere on the plan for local photo correction.":"Multi-point photo correction is active."}`)
   }
 }
 function bpBuildImageCandidates(){
@@ -347,9 +373,10 @@ function bpBuildImageCandidates(){
   const scale=bpState.scaleFeetPerPx;
   bpState.detectedRuns=runs;
   bpState.candidates=runs.map((r,i)=>{
-    const lf=scale?bpRoundFeet(r.pixels*scale):0;
+    const localScale=scale?bpScaleAt(r.x,r.y):null;
+    const lf=localScale?bpRoundFeet(r.pixels*localScale):0;
     const wallType=r.color==="orange"?"3 5/8 or 6 • Fire Rated":"3 5/8 or 6 • Regular";
-    return{id:"img-"+i,sheet:"Image",name:`${bpColorName(r.color)} segment ${i+1}`,lf,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:r.color==="orange"?"5/8 Type X":"5/8 Regular",sides:2,color:r.color,confidence:r.confidence,reviewed:false,axis:r.axis,x:r.x,y:r.y,pixels:r.pixels,flag:scale?"":"Needs calibration",wallType}
+    return{id:"img-"+i,sheet:"Image",name:`${bpColorName(r.color)} segment ${i+1}`,lf,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:r.color==="orange"?"5/8 Type X":"5/8 Regular",sides:2,color:r.color,confidence:r.confidence,reviewed:false,axis:r.axis,x:r.x,y:r.y,pixels:r.pixels,gaps:r.gaps||0,gapPixels:r.gapPixels||0,localScale,flag:scale?"":"Needs calibration",wallType}
   })
 }
 async function bpAnalyzeCurrent(){
@@ -385,7 +412,7 @@ async function bpLoadImage(file){
     const max=1400,scale=Math.min(1,max/img.naturalWidth),w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
     const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
     bpState.image={file,img,canvas:c,width:w,height:h};bpState.pages=[{page:1,text:"Image blueprint",type:"Image / Floor Plan",useful:"Highlighted wall detection, OCR, visual review"}];
-    bpState.scaleFeetPerPx=null;bpState.calibrating=false;bpState.calPts=[];bpState.ocrText="";bpState.ocrConfidence=0;
+    bpState.scaleFeetPerPx=null;bpState.calibration=null;bpState.calibrations=[];bpState.calibrating=false;bpState.calPts=[];bpState.ocrText="";bpState.ocrConfidence=0;
     bpBuildImageCandidates();bpRenderCanvas();bpRender();
     await bpAnalyzeCurrent()
   };img.onerror=()=>bpStatus("Could not load the image.");img.src=URL.createObjectURL(file)
@@ -409,6 +436,7 @@ function bpRenderCanvas(){
   if(!bpState.image){c.width=10;c.height=10;c.getContext("2d").clearRect(0,0,10,10);return}
   const src=bpState.image.canvas;c.width=src.width;c.height=src.height;const ctx=c.getContext("2d");ctx.drawImage(src,0,0);
   (bpState.detectedRuns||[]).forEach((r,i)=>{ctx.save();ctx.lineWidth=Math.max(3,Math.min(9,src.width/300));ctx.globalAlpha=.85;ctx.strokeStyle=r.color==="green"?"#19a83a":"#f28a00";ctx.beginPath();if(r.axis==="h"){ctx.moveTo(r.start??(r.x-r.pixels/2),r.y);ctx.lineTo(r.end??(r.x+r.pixels/2),r.y)}else{ctx.moveTo(r.x,r.start??(r.y-r.pixels/2));ctx.lineTo(r.x,r.end??(r.y+r.pixels/2))}ctx.stroke();ctx.fillStyle=ctx.strokeStyle;ctx.font="bold 13px sans-serif";ctx.fillText(String(i+1),r.x+5,r.y-5);ctx.restore()});
+  (bpState.calibrations||[]).forEach((cal,i)=>{ctx.save();ctx.strokeStyle="#1976d2";ctx.fillStyle="#1976d2";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cal.a.x,cal.a.y);ctx.lineTo(cal.b.x,cal.b.y);ctx.stroke();ctx.font="bold 14px sans-serif";ctx.fillText(`C${i+1}`,cal.x+5,cal.y-5);ctx.restore()});
   if(bpState.calPts?.length){ctx.fillStyle="#d00";bpState.calPts.forEach((p,i)=>{ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fill();ctx.fillText(String(i+1),p.x+9,p.y-9)})}
 }
 function bpIsManualCandidate(c){return c&&c.sheet==="Manual"}
@@ -426,13 +454,13 @@ function bpCandidateFields(c,i){return `
   <div><label>Recognition</label><div style="padding:10px 0;font-weight:900">${Math.round(c.confidence*100)}%</div></div>`}
 function bpRenderMobileCards(cand){const el=$("bpTakeoffCards");if(!el)return;el.innerHTML=cand.length?cand.map((c,i)=>{const can=bpCandidateCanReview(c),scaleOk=!!bpState.scaleFeetPerPx||bpIsManualCandidate(c);return `<div class="wall-card"><div class="wall-head"><div><div class="wall-title">${escapeHtml(bpColorName(c.color))} • ${escapeHtml(c.name)}</div><div class="muted">Candidate ${i+1}</div></div><span class="badge">${Math.round(c.confidence*100)}%</span></div><div class="fields">${bpCandidateFields(c,i)}</div><div class="status-line ${c.reviewed?"ready":scaleOk?"":"warn"}">${c.reviewed?"✓ Reviewed and ready for Areas":!scaleOk?"Calibration required before this image wall can be reviewed.":can?"Ready for your review.":"Enter a verified wall length and height."}</div><div class="card-actions"><button class="${c.reviewed?"primary":"secondary"} ${(!can&&!c.reviewed)?"is-disabled":""}" onclick="bpSetReviewed(${i},${!c.reviewed})">${c.reviewed?"Reviewed ✓":"Review wall"}</button><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRenderCanvas();bpRender()">Delete</button></div></div>`}).join(""):"<p class='muted'>No wall candidates yet. Upload an image, then calibrate the scale.</p>"}
 function bpRender(){
-  const pages=bpState.pages||[],cand=bpState.candidates||[];
+  const pages=bpState.pages||[],cand=bpState.candidates||[];bpRefreshScaleSummary();
   $("bpWallCount").textContent=bpState.detectedRuns?.length||0;$("bpOcrConfidence").textContent=bpState.ocrConfidence?Math.round(bpState.ocrConfidence)+"%":"--";
   $("bpSummary").innerHTML=[["Sheets",pages.length],["Findings",bpState.findings.length],["Wall Candidates",cand.length],["Reviewed",cand.filter(c=>c.reviewed).length]].map(x=>`<div class="card"><span class="muted">${x[0]}</span><div class="metric">${x[1]}</div></div>`).join("");
   $("bpFindings").innerHTML=bpState.findings.length?bpState.findings.map((f,i)=>`<tr><td>${f.finding}</td><td>${escapeHtml(String(f.value))}</td><td>${Math.round((f.confidence||0)*100)}%</td><td><button class="${f.accepted?'primary':'secondary'}" onclick="bpToggleFinding(${i})">${f.accepted?'Accepted':'Use'}</button></td></tr>`).join(""):"<tr><td colspan=4>No findings yet.</td></tr>";
   const imageCandidates=cand.filter(c=>!bpIsManualCandidate(c)), calibrated=!!bpState.scaleFeetPerPx;
   const banner=$("bpCalibrationBanner");
-  if(banner){if(!imageCandidates.length){banner.className="cal-banner";banner.innerHTML="<div class='cal-title'>No image walls waiting for calibration</div><div class='muted'>Upload an image or add a wall manually.</div>"}else if(!calibrated){banner.className="cal-banner warn";banner.innerHTML=`<div class="cal-title">Calibration required before review</div><div>${imageCandidates.length} image wall candidate(s) were detected, but their LF cannot be verified yet.</div><div class="muted" style="margin-top:4px">Enter a known dimension above, tap <b>Calibrate from two points</b>, then tap the two ends of that dimension on the drawing.</div><div class="actions"><button class="primary" onclick="bpStartCalibration()">Calibrate now</button></div>`}else{const fpp=bpState.scaleFeetPerPx;banner.className="cal-banner ready";banner.innerHTML=`<div class="cal-title">✓ Scale calibrated</div><div>${bpState.calibration?`${bpState.calibration.feet} ft = ${Math.round(bpState.calibration.pixels)} image px`:"Image scale is calibrated"}. Straight-segment LF values are now available for review. Corners and intersecting runs are kept as separate candidates.</div><div class="muted">${fpp.toFixed(5)} ft/px</div>`}}
+  if(banner){if(!imageCandidates.length){banner.className="cal-banner";banner.innerHTML="<div class='cal-title'>No image walls waiting for calibration</div><div class='muted'>Upload an image or add a wall manually.</div>"}else if(!calibrated){banner.className="cal-banner warn";banner.innerHTML=`<div class="cal-title">Calibration required before review</div><div>${imageCandidates.length} image wall candidate(s) were detected, but their LF cannot be verified yet.</div><div class="muted" style="margin-top:4px">Enter a known dimension above, tap <b>Calibrate from two points</b>, then tap the two ends of that dimension on the drawing.</div><div class="actions"><button class="primary" onclick="bpStartCalibration()">Calibrate now</button></div>`}else{const fpp=bpState.scaleFeetPerPx;banner.className="cal-banner ready";banner.innerHTML=`<div class="cal-title">✓ Scale calibrated</div><div>${bpState.calibration?`${bpState.calibration.feet} ft = ${Math.round(bpState.calibration.pixels)} image px`:"Image scale is calibrated"}. Gap-aware reconstructed LF values are available for review. ${((bpState.calibrations||[]).length>1)?"Multi-point local photo correction is active.":"Add a second calibration elsewhere on the plan for local photo-distortion correction."}</div><div class="muted">${fpp.toFixed(5)} ft/px</div>`}}
   $("bpTakeoffRows").innerHTML=cand.length?cand.map((c,i)=>{const can=bpCandidateCanReview(c),scaleOk=!!bpState.scaleFeetPerPx||bpIsManualCandidate(c);return `<tr><td>${bpColorName(c.color)}</td><td><input value="${escapeAttr(c.name)}" onchange="bpState.candidates[${i}].name=this.value"></td><td><input type=number step=.001 value="${Number(c.lf||0).toFixed(3)}" onchange="bpState.candidates[${i}].lf=bpRoundFeet(+this.value);bpState.candidates[${i}].reviewed=false;bpRender()"><div class="muted">${c.lf>0?bpFormatFeet(c.lf):"Not measured"}</div></td><td><input type=number step=.5 value="${c.height}" onchange="bpState.candidates[${i}].height=+this.value;bpState.candidates[${i}].reviewed=false;bpRender()"></td><td><select onchange="bpState.candidates[${i}].stud=this.value;bpState.candidates[${i}].reviewed=false">${["2 1/2","3 5/8","6","8","10"].map(v=>`<option ${c.stud==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].gauge=this.value;bpState.candidates[${i}].reviewed=false">${["25","20","18"].map(v=>`<option ${c.gauge==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].spacing=this.value;bpState.candidates[${i}].reviewed=false">${["12","16","24"].map(v=>`<option ${c.spacing==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].drywall=this.value;bpState.candidates[${i}].reviewed=false">${["1/2 Regular","5/8 Regular","5/8 Type X","Moisture Resistant"].map(v=>`<option ${c.drywall==v?"selected":""}>${v}</option>`).join("")}</select></td><td><select onchange="bpState.candidates[${i}].sides=+this.value;bpState.candidates[${i}].reviewed=false"><option value=1 ${c.sides==1?"selected":""}>1</option><option value=2 ${c.sides==2?"selected":""}>2</option></select></td><td>${Math.round(c.confidence*100)}%</td><td><button class="${c.reviewed?'primary':'secondary'} ${(!can&&!c.reviewed)?'is-disabled':''}" onclick="bpSetReviewed(${i},${!c.reviewed})">${c.reviewed?'Reviewed':'Review'}</button><div class="muted">${c.reviewed?'Ready':!scaleOk?'Needs calibration':can?'Ready to review':'Verify dimensions'}</div></td><td><button class="danger" onclick="bpState.candidates.splice(${i},1);bpRenderCanvas();bpRender()">Delete</button></td></tr>`}).join(""):"<tr><td colspan=12>No wall candidates yet. Upload an image and calibrate the scale.</td></tr>";
   bpRenderMobileCards(cand);
   const mark=$("bpMarkAllBtn"),apply=$("bpApplyBtn");if(mark){mark.classList.toggle("is-disabled",imageCandidates.length>0&&!calibrated)}if(apply){const ready=cand.filter(c=>c.reviewed&&c.lf>0&&c.height>0);apply.textContent=ready.length?`Add reviewed walls to Areas (${ready.length})`:"Add reviewed walls to Areas"}
@@ -462,7 +490,7 @@ function bpExportCsv(){
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 function escapeAttr(s){return escapeHtml(s)}
-function clearBlueprint(){bpState={pages:[],findings:[],candidates:[],notes:"",image:null,scaleFeetPerPx:null,calibration:null,calibrating:false,calPts:[]};if($("bpNotes"))$("bpNotes").value="";bpStatus("No blueprint loaded.");bpRender()}
+function clearBlueprint(){bpState={pages:[],findings:[],candidates:[],notes:"",image:null,scaleFeetPerPx:null,calibration:null,calibrations:[],calibrating:false,calPts:[]};if($("bpNotes"))$("bpNotes").value="";bpStatus("No blueprint loaded.");bpRender()}
 function saveBlueprintNotes(){bpState.notes=$("bpNotes").value;localStorage.setItem("azteca_bp_notes",bpState.notes);alert("Blueprint notes saved on this device.")}
 $("bpFile")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadPdf(f)});
 $("bpImage")?.addEventListener("change",e=>{const f=e.target.files[0];if(f)bpLoadImage(f)});

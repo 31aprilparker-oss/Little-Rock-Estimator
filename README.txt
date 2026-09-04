@@ -1,12 +1,9 @@
-Azteca Elite Construction Estimator v4.4 - Measurement Accuracy Update
+Azteca Elite Construction Estimator v4.5 - Wall Reconstruction + Photo Correction
 
-Changes in v4.4:
-- Splits highlighted paths into straight wall segments instead of treating a long connected highlight as one wall.
-- Breaks candidates at gaps/corners/intersections where possible.
-- Collapses duplicate detections caused by highlighter thickness.
-- Keeps only collinear fragments merged across tiny breaks.
-- Uses calibrated scale for each straight segment.
-- Rounds internal wall lengths to 1/8 inch and displays construction-style feet/inches to the nearest 1/16 inch.
-- Keeps mobile review, calibration enforcement, OCR, and manual verification workflow.
+Replace the existing GitHub Pages files with index.html, manifest.webmanifest, sw.js, icon.svg, and README.txt.
 
-Important: Image recognition is an estimating aid, not a contractual quantity source. Verify wall segments, dimensions, assemblies, openings, plan scale, and specifications before bidding.
+V4.5 adds gap-aware reconstruction of collinear highlighted wall runs and multi-point local calibration. Add at least two known dimensions in different parts of a photographed plan when possible. The app interpolates local feet-per-pixel values near each detected wall to reduce measurement drift caused by paper/camera distortion.
+
+Door symbols, labels, weak highlighter gaps, and intersections can be bridged when segments remain collinear. 90-degree turns remain separate candidates. Review the numbered overlay and every quantity before adding walls to Areas.
+
+Do not use automated findings as a contractual bid without reviewing plans, specifications, assemblies, dimensions, scale, openings, field conditions, supplier quotes and production rates.

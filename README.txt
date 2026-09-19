@@ -1,4 +1,4 @@
-Azteca Elite Construction Estimator v4.6.1 - Calibration Undo + Building Footprint
+Azteca Elite Construction Estimator v4.6.2 - Calibration Undo + Building Footprint
 
 Replace the existing GitHub Pages files with index.html, manifest.webmanifest, sw.js, README.txt and icon.svg.
 
@@ -9,3 +9,6 @@ V4.6 separates building square footage from partition-wall takeoff. After calibr
 Wall reconstruction, image recognition, OCR, mobile review cards and multi-point calibration from v4.5 are preserved.
 
 For photographed drawings, verify calibration and footprint corners before relying on area. Automated quantities should not be used as a contractual bid without plan/specification review, field verification, supplier quotes and production-rate validation.
+
+
+v4.6.2 adds FRP wall-panel estimating with panel sizes, waste, openings, adhesive, trim, labor, pricing, and bid integration.

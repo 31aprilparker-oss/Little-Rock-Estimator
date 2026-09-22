@@ -58,10 +58,24 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 #jobs #jtCodeRows tr.jt-open td.jt-action{margin-top:4px}
 }
 
+
+@media(max-width:700px){
+#employees .grid{grid-template-columns:1fr!important;gap:12px}
+#employees .actions button{flex:1 1 100%;min-height:44px}
+#employees .scroll{overflow:visible}
+#employees table,#employees thead,#employees tbody,#employees tr,#employees th,#employees td{display:block;width:100%}
+#employees thead{display:none}
+#employees tbody tr{border:1px solid #dfe4e8;border-radius:12px;padding:12px;margin:0 0 12px;background:#fff}
+#employees tbody td{border:0;padding:5px 0;display:grid;grid-template-columns:105px minmax(0,1fr);gap:8px}
+#employees tbody td::before{content:attr(data-label);font-size:11px;font-weight:900;color:#687681;text-transform:uppercase}
+#employees tbody td.emp-action{grid-template-columns:1fr}
+#employees tbody td.emp-action::before{display:none}
+}
+
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
 </style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.7.2 Blueprint Takeoff, FRP & Job Tracking</p></header>
-<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="frp">FRP</button><button data-tab="jobs">Job Tracking</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.7.3 Blueprint Takeoff, FRP, Job Tracking & Employees</p></header>
+<nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="frp">FRP</button><button data-tab="jobs">Job Tracking</button><button data-tab="employees">Employees</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → FRP → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
 
@@ -158,20 +172,39 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 <section id="frp" class="tab"><div class="card"><h2>FRP Wall Panel Estimator</h2><p class="muted">Estimate fiberglass reinforced plastic wall panels independently from drywall. Enter each FRP wall/room, subtract openings, choose panel size, and set waste. Pricing and labor flow into the final bid.</p><button class="primary" onclick="addFrpArea()">+ Add FRP Area</button><div id="frpCards"></div></div><div class="card"><h2>FRP Pricing & Labor</h2><div class="grid"><div><label>FRP Panel Cost ($ / panel)</label><input id="frpPanelCost" type="number" step=".01" value="0" oninput="render()"></div><div><label>Adhesive Cost ($ / gallon)</label><input id="frpAdhesiveCost" type="number" step=".01" value="0" oninput="render()"></div><div><label>Trim Cost ($ / 10-ft piece)</label><input id="frpTrimCost" type="number" step=".01" value="0" oninput="render()"></div><div><label>Labor Hours / Panel</label><input id="frpLaborPerPanel" type="number" step=".01" value="0.35" oninput="render()"></div><div><label>Adhesive Coverage (SF / gallon)</label><input id="frpAdhesiveCoverage" type="number" step="1" value="50" oninput="render()"></div></div></div><div class="card"><h2>FRP Takeoff</h2><div class="grid"><div><span class="muted">Net FRP Area</span><div class="metric" id="frpNetSF">0 SF</div></div><div><span class="muted">Panels</span><div class="metric" id="frpPanels">0</div></div><div><span class="muted">Adhesive</span><div class="metric" id="frpAdhesive">0 gal</div></div><div><span class="muted">Trim</span><div class="metric" id="frpTrim">0 pcs</div></div><div><span class="muted">FRP Material</span><div class="metric" id="frpMaterial">$0</div></div><div><span class="muted">FRP Labor</span><div class="metric" id="frpLabor">$0</div></div></div><p class="muted">Panel count is based on net area plus waste and rounded up to whole panels. Adhesive and trim are separate quantities. Verify manufacturer coverage, trim requirements, panel orientation, substrate preparation, and local supplier pricing before bidding.</p></div></section>
 
 <section id="jobs" class="tab">
-  <div class="card"><h2>Job Tracking</h2><p class="muted">Track customer receivables, approved change orders, retainage, labor-code payments, and employee/subcontractor payables. Data is saved on this device.</p>
+  <div class="card"><h2>Job Tracking</h2><p class="muted">Track customer receivables, approved change orders, retainage, and labor-code payments. Employee hours and labor cost are tracked separately on the Employees tab. Data is saved on this device.</p>
     <div class="grid"><div><label>Job #</label><input id="jtJobNo" placeholder="2056"></div><div><label>Project / Job Name</label><input id="jtJobName"></div><div><label>Customer / General Contractor</label><input id="jtCustomer"></div><div><label>Original Contract ($)</label><input id="jtContract" type="number" step=".01" value="0"></div><div><label>Retainage %</label><input id="jtRetainage" type="number" step=".01" value="10"></div></div>
     <div class="actions"><button class="primary" onclick="jtSaveJob()">Save / Update Job</button><button class="secondary" onclick="jtNewJob()">New Job</button><button class="secondary" onclick="jtExportCsv()">Export CSV</button></div>
   </div>
-  <div class="card"><h2>Job Summary</h2><div class="grid"><div><span class="muted">Revised Contract</span><div class="metric" id="jtRevised">$0</div></div><div><span class="muted">Payments Received</span><div class="metric" id="jtReceived">$0</div></div><div><span class="muted">Current A/R</span><div class="metric" id="jtAR">$0</div></div><div><span class="muted">Retainage Outstanding</span><div class="metric" id="jtRetOut">$0</div></div><div><span class="muted">Payables Outstanding</span><div class="metric" id="jtPayOut">$0</div></div><div><span class="muted">Collection %</span><div class="metric" id="jtPct">0%</div></div></div></div>
+  <div class="card"><h2>Job Summary</h2><div class="grid"><div><span class="muted">Revised Contract</span><div class="metric" id="jtRevised">$0</div></div><div><span class="muted">Payments Received</span><div class="metric" id="jtReceived">$0</div></div><div><span class="muted">Current A/R</span><div class="metric" id="jtAR">$0</div></div><div><span class="muted">Retainage Outstanding</span><div class="metric" id="jtRetOut">$0</div></div><div><span class="muted">Collection %</span><div class="metric" id="jtPct">0%</div></div></div></div>
   <div class="card"><h2>Labor Codes / Amount Due</h2><div class="actions"><button class="secondary" onclick="jtAddCode()">+ Add Labor Code</button></div><div class="scroll"><table><thead><tr><th>Code</th><th>Description</th><th>Amount Due</th><th>Received</th><th>Balance</th><th>Status</th><th></th></tr></thead><tbody id="jtCodeRows"></tbody></table></div></div>
   <div class="card"><h2>Customer Payment</h2><div class="grid"><div><label>Date</label><input id="jtPayDate" type="date"></div><div><label>Labor Code</label><select id="jtPayCode"></select></div><div><label>Amount Received ($)</label><input id="jtPayAmount" type="number" step=".01"></div><div><label>Reference / Check / ACH</label><input id="jtPayRef"></div><div><label>Notes</label><input id="jtPayNote"></div></div><div class="actions"><button class="primary" onclick="jtAddPayment()">Add Payment</button></div><div class="scroll"><table><thead><tr><th>Date</th><th>Code</th><th>Amount</th><th>Reference</th><th>Notes</th><th></th></tr></thead><tbody id="jtPaymentRows"></tbody></table></div></div>
   <div class="card"><h2>Change Orders</h2><div class="grid"><div><label>CO #</label><input id="jtCoNo"></div><div><label>Description</label><input id="jtCoDesc"></div><div><label>Amount ($)</label><input id="jtCoAmount" type="number" step=".01"></div><div><label>Status</label><select id="jtCoStatus"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div></div><div class="actions"><button class="primary" onclick="jtAddCO()">Add Change Order</button></div><div class="scroll"><table><thead><tr><th>CO #</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody id="jtCoRows"></tbody></table></div></div>
-  <div class="card"><h2>Employee / Subcontractor Payables</h2><div class="grid"><div><label>Name / Company</label><input id="jtVendor"></div><div><label>Type</label><select id="jtVendorType"><option>Employee</option><option>Subcontractor</option></select></div><div><label>Labor Code</label><select id="jtVendorCode"></select></div><div><label>Amount Earned ($)</label><input id="jtEarned" type="number" step=".01"></div><div><label>Amount Paid ($)</label><input id="jtPaid" type="number" step=".01" value="0"></div><div><label>Payment Date</label><input id="jtVendorDate" type="date"></div><div><label>Reference / Notes</label><input id="jtVendorRef"></div></div><div class="actions"><button class="primary" onclick="jtAddPayable()">Add Payable</button></div><div class="scroll"><table><thead><tr><th>Name</th><th>Type</th><th>Code</th><th>Earned</th><th>Paid</th><th>Balance</th><th></th></tr></thead><tbody id="jtPayableRows"></tbody></table></div></div>
-  <div class="card"><h2>Saved Jobs</h2><div id="jtSavedJobs"></div></div>
+    <div class="card"><h2>Saved Jobs</h2><div id="jtSavedJobs"></div></div>
 </section>
+
+<section id="employees" class="tab">
+  <div class="card"><h2>Employees</h2><p class="muted">Save each employee and hourly rate once. Then enter daily hours by job number. One employee can have multiple job entries on the same day.</p>
+    <div class="grid"><div><label>Employee Name</label><input id="empName" placeholder="Employee name"></div><div><label>Hourly Rate ($)</label><input id="empRate" type="number" min="0" step=".01" placeholder="0.00"></div></div>
+    <div class="actions"><button class="primary" onclick="empSaveEmployee()">Save / Update Employee</button><button class="secondary" onclick="empClearEmployee()">New Employee</button></div>
+    <div id="empEmployeeList" style="margin-top:12px"></div>
+  </div>
+  <div class="card"><h2>Daily Time Entry</h2>
+    <div class="grid"><div><label>Employee</label><select id="empSelect"></select></div><div><label>Job #</label><input id="empJobNo" placeholder="2056" list="empJobList"><datalist id="empJobList"></datalist></div><div><label>Date Worked</label><input id="empWorkDate" type="date"></div><div><label>Hours Worked</label><input id="empHours" type="number" min="0" step=".25" placeholder="0"></div><div style="grid-column:1/-1"><label>Notes</label><input id="empNotes" placeholder="Left early, did not work, weather, no show, etc."></div></div>
+    <div class="actions"><button class="primary" onclick="empAddTime()">Add Daily Time</button></div>
+  </div>
+  <div class="card"><h2>Weekly Summary</h2>
+    <div class="grid"><div><label>Week</label><input id="empWeek" type="week" onchange="empRender()"></div><div><label>Employee Filter</label><select id="empFilter" onchange="empRender()"><option value="">All Employees</option></select></div><div><label>Job # Filter</label><input id="empJobFilter" placeholder="All jobs" oninput="empRender()"></div></div>
+    <div class="grid" style="margin-top:12px"><div><span class="muted">Weekly Hours</span><div class="metric" id="empWeekHours">0</div></div><div><span class="muted">Weekly Gross Pay</span><div class="metric" id="empWeekPay">$0</div></div></div>
+    <div id="empWeeklyCards" style="margin-top:12px"></div>
+  </div>
+  <div class="card"><h2>Time Entries</h2><div class="scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Job #</th><th>Rate</th><th>Hours</th><th>Daily Pay</th><th>Notes</th><th></th></tr></thead><tbody id="empTimeRows"></tbody></table></div></div>
+  <div class="card"><h2>Labor by Job</h2><div id="empJobTotals"></div></div>
+</section>
+
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.7.2 • Building footprint + FRP + Job Tracking</footer>
+</main><footer>Azteca Elite Construction Estimator v4.7.3 • Building footprint + FRP + Job Tracking + Employees</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[],frpAreas=[];
@@ -700,7 +733,7 @@ function jtDeleteCO(i){if(!jtCurrent)return;jtStore.jobs[jtCurrent].cos.splice(i
 function jtAddPayable(){if(!jtCurrent){alert("Save or open a job first.");return}const earned=N("jtEarned"),paid=N("jtPaid");if(earned<=0){alert("Enter the amount earned.");return}jtStore.jobs[jtCurrent].payables.push({vendor:$("jtVendor").value.trim(),type:$("jtVendorType").value,code:$("jtVendorCode").value,earned,paid,date:$("jtVendorDate").value,ref:$("jtVendorRef").value.trim()});jtPersist();$("jtVendor").value="";$("jtEarned").value="";$("jtPaid").value=0;$("jtVendorRef").value="";jtRender()}
 function jtDeletePayable(i){if(!jtCurrent)return;jtStore.jobs[jtCurrent].payables.splice(i,1);jtPersist();jtRender()}
 function jtRender(d){d=d||jtGet();d.codes=d.codes||jtDefaultCodes();d.payments=d.payments||[];d.cos=d.cos||[];d.payables=d.payables||[];const approved=d.cos.filter(c=>c.status==="Approved").reduce((s,c)=>s+(Number(c.amount)||0),0),revised=(Number(d.contract)||0)+approved,received=d.payments.reduce((s,p)=>s+(Number(p.amount)||0),0),retTarget=revised*(Number(d.retainage)||0)/100,retReleased=Math.max(0,received-(revised-retTarget)),retOut=Math.max(0,retTarget-retReleased),ar=Math.max(0,revised-received),payOut=d.payables.reduce((s,p)=>s+Math.max(0,(Number(p.earned)||0)-(Number(p.paid)||0)),0),pct=revised?Math.min(999,received/revised*100):0;
-if($("jtRevised")){$("jtRevised").textContent=M(revised);$("jtReceived").textContent=M(received);$("jtAR").textContent=M(ar);$("jtRetOut").textContent=M(retOut);$("jtPayOut").textContent=M(payOut);$("jtPct").textContent=pct.toFixed(1)+"%"}
+if($("jtRevised")){$("jtRevised").textContent=M(revised);$("jtReceived").textContent=M(received);$("jtAR").textContent=M(ar);$("jtRetOut").textContent=M(retOut);$("jtPct").textContent=pct.toFixed(1)+"%"}
 const recBy={};d.payments.forEach(p=>recBy[p.code]=(recBy[p.code]||0)+(Number(p.amount)||0));if($("jtCodeRows"))$("jtCodeRows").innerHTML=d.codes.map((c,i)=>{const r=recBy[c.code]||0,b=(Number(c.due)||0)-r,st=b>0.005?"Balance Due":b<-.005?"Overpaid":"Paid",cls=b>0.005?"due":b<-.005?"over":"paid";return `<tr><td class="jt-code-summary" onclick="jtToggleCode(this)"><div class="jt-summary-top"><span class="jt-summary-code">${escapeHtml(c.code||"—")}</span><span class="jt-summary-desc">${escapeHtml(c.desc||"New Labor Code")}</span><span class="jt-chevron">⌄</span></div><div class="jt-summary-money"><span>Due<b>${M(Number(c.due)||0)}</b></span><span>Received<b>${M(r)}</b></span><span class="jt-summary-balance ${cls}">Balance<b>${M(b)}</b></span></div><div class="jt-summary-status ${cls}">${st}</div></td><td data-label="Code"><input value="${escapeAttr(c.code)}" onchange="jtSetCode(${i},'code',this.value)"></td><td data-label="Description"><input value="${escapeAttr(c.desc)}" onchange="jtSetCode(${i},'desc',this.value)"></td><td data-label="Amount Due"><input type="number" step=".01" value="${Number(c.due)||0}" onchange="jtSetCode(${i},'due',this.value)"></td><td data-label="Received">${M(r)}</td><td data-label="Balance">${M(b)}</td><td data-label="Status"><b>${st}</b></td><td class="jt-action"><button class="danger" onclick="event.stopPropagation();jtDeleteCode(${i})">Delete Labor Code</button></td></tr>`}).join("");
 const opts=d.codes.map(c=>`<option value="${escapeAttr(c.code)}">${escapeHtml(c.code)} ${escapeHtml(c.desc)}</option>`).join("");if($("jtPayCode"))$("jtPayCode").innerHTML=opts;if($("jtVendorCode"))$("jtVendorCode").innerHTML=opts;
 if($("jtPaymentRows"))$("jtPaymentRows").innerHTML=d.payments.map((p,i)=>`<tr><td data-label="Date">${escapeHtml(p.date||"")}</td><td data-label="Labor Code">${escapeHtml(p.code||"")}</td><td data-label="Amount">${M(p.amount||0)}</td><td data-label="Reference">${escapeHtml(p.ref||"")}</td><td data-label="Notes">${escapeHtml(p.note||"")}</td><td class="jt-action"><button class="danger" onclick="jtDeletePayment(${i})">Delete Payment</button></td></tr>`).join("")||'<tr><td colspan="6" class="muted">No payments entered.</td></tr>';
@@ -709,7 +742,67 @@ if($("jtPayableRows"))$("jtPayableRows").innerHTML=d.payables.map((p,i)=>`<tr><t
 if($("jtSavedJobs"))$("jtSavedJobs").innerHTML=Object.keys(jtStore.jobs).length?Object.keys(jtStore.jobs).map(no=>{const j=jtStore.jobs[no];return `<div class="wall-card"><div class="wall-head"><div><b>Job ${escapeHtml(no)}</b><div class="muted">${escapeHtml(j.name||"")} • ${escapeHtml(j.customer||"")}</div></div></div><div class="actions"><button class="secondary" onclick='jtLoad(${JSON.stringify(no)})'>Open</button><button class="danger" onclick='jtDeleteJob(${JSON.stringify(no)})'>Delete</button></div></div>`}).join(""):'<p class="muted">No saved jobs yet.</p>';
 }
 function jtExportCsv(){if(!jtCurrent){alert("Open a job first.");return}const d=jtGet(),rows=[["Job #",d.jobNo],["Project",d.name],["Customer / GC",d.customer],["Original Contract",d.contract],["Retainage %",d.retainage],[],["LABOR CODES"],["Code","Description","Amount Due"],...d.codes.map(c=>[c.code,c.desc,c.due]),[],["CUSTOMER PAYMENTS"],["Date","Labor Code","Amount","Reference","Notes"],...d.payments.map(p=>[p.date,p.code,p.amount,p.ref,p.note]),[],["CHANGE ORDERS"],["CO #","Description","Amount","Status"],...d.cos.map(c=>[c.no,c.desc,c.amount,c.status]),[],["PAYABLES"],["Name","Type","Labor Code","Earned","Paid","Date","Reference"],...d.payables.map(p=>[p.vendor,p.type,p.code,p.earned,p.paid,p.date,p.ref])];const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`Azteca-Job-${d.jobNo}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
-window.addEventListener("load",()=>{if($("jtPayDate"))$("jtPayDate").value=new Date().toISOString().slice(0,10);if($("jtVendorDate"))$("jtVendorDate").value=new Date().toISOString().slice(0,10);jtNewJob()});
+
+// ---------- Employees v4.7.3 ----------
+const EMP_KEY="azteca_employees_v473";
+let empStore=(()=>{try{return JSON.parse(localStorage.getItem(EMP_KEY)||'{"employees":[],"entries":[]}')}catch(e){return{employees:[],entries:[]}}})();
+let empEditing=null;
+function empPersist(){localStorage.setItem(EMP_KEY,JSON.stringify(empStore))}
+function empId(){return "e"+Date.now()+Math.random().toString(36).slice(2,7)}
+function empSaveEmployee(){
+  const name=$("empName").value.trim(),rate=N("empRate");
+  if(!name){alert("Enter the employee name.");return}
+  if(rate<0){alert("Enter a valid hourly rate.");return}
+  if(empEditing){const e=empStore.employees.find(x=>x.id===empEditing);if(e){e.name=name;e.rate=rate}}
+  else empStore.employees.push({id:empId(),name,rate});
+  empPersist();empClearEmployee();empRender()
+}
+function empEditEmployee(id){const e=empStore.employees.find(x=>x.id===id);if(!e)return;empEditing=id;$("empName").value=e.name;$("empRate").value=e.rate;window.scrollTo({top:$("employees").offsetTop,behavior:"smooth"})}
+function empDeleteEmployee(id){
+  const e=empStore.employees.find(x=>x.id===id);if(!e)return;
+  if(empStore.entries.some(x=>x.employeeId===id)){alert("This employee has time entries. Delete those entries first so the labor history is not lost.");return}
+  if(!confirm("Delete "+e.name+"?"))return;empStore.employees=empStore.employees.filter(x=>x.id!==id);empPersist();empRender()
+}
+function empClearEmployee(){empEditing=null;if($("empName"))$("empName").value="";if($("empRate"))$("empRate").value=""}
+function empAddTime(){
+  const employeeId=$("empSelect").value,jobNo=$("empJobNo").value.trim(),date=$("empWorkDate").value,hours=N("empHours"),notes=$("empNotes").value.trim();
+  const e=empStore.employees.find(x=>x.id===employeeId);
+  if(!e){alert("Save or select an employee first.");return}
+  if(!jobNo){alert("Enter the Job #.");return}
+  if(!date){alert("Enter the date worked.");return}
+  if(hours<0){alert("Hours cannot be negative.");return}
+  if(hours===0&&!notes){alert("For a zero-hour day, add a note such as Did not work, No show, or Weather.");return}
+  empStore.entries.push({id:empId(),employeeId,employeeName:e.name,rate:Number(e.rate)||0,jobNo,date,hours,notes});
+  empPersist();$("empHours").value="";$("empNotes").value="";empRender()
+}
+function empDeleteTime(id){if(!confirm("Delete this time entry?"))return;empStore.entries=empStore.entries.filter(x=>x.id!==id);empPersist();empRender()}
+function empWeekStartEnd(v){
+  if(!v)return null;const [y,w]=v.split("-W").map(Number);const jan4=new Date(y,0,4),dow=jan4.getDay()||7,monday=new Date(y,0,4-(dow-1)+(w-1)*7);monday.setHours(0,0,0,0);const end=new Date(monday);end.setDate(end.getDate()+7);return[monday,end]
+}
+function empCurrentWeekValue(d=new Date()){
+  const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));const w=Math.ceil((((x-y)/86400000)+1)/7);return x.getUTCFullYear()+"-W"+String(w).padStart(2,"0")
+}
+function empInWeek(date,v){const r=empWeekStartEnd(v);if(!r)return true;const d=new Date(date+"T12:00:00");return d>=r[0]&&d<r[1]}
+function empRender(){
+  if(!$("employees"))return;
+  const emps=empStore.employees.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const currentSel=$("empSelect")?.value||"",currentFilter=$("empFilter")?.value||"";
+  const opts=emps.map(e=>`<option value="${escapeAttr(e.id)}">${escapeHtml(e.name)} • ${M(e.rate)}/hr</option>`).join("");
+  $("empSelect").innerHTML=emps.length?opts:'<option value="">Save an employee first</option>';if(currentSel&&emps.some(e=>e.id===currentSel))$("empSelect").value=currentSel;
+  $("empFilter").innerHTML='<option value="">All Employees</option>'+emps.map(e=>`<option value="${escapeAttr(e.id)}">${escapeHtml(e.name)}</option>`).join("");if(currentFilter&&emps.some(e=>e.id===currentFilter))$("empFilter").value=currentFilter;
+  $("empEmployeeList").innerHTML=emps.length?emps.map(e=>`<div class="wall-card"><div class="wall-head"><div><b>${escapeHtml(e.name)}</b><div class="muted">${M(e.rate)}/hr</div></div></div><div class="actions"><button class="secondary" onclick='empEditEmployee(${JSON.stringify(e.id)})'>Edit</button><button class="danger" onclick='empDeleteEmployee(${JSON.stringify(e.id)})'>Delete</button></div></div>`).join(""):'<p class="muted">No employees saved yet.</p>';
+  const jobs=new Set([...Object.keys(jtStore.jobs||{}),...empStore.entries.map(x=>x.jobNo).filter(Boolean)]);$("empJobList").innerHTML=[...jobs].sort().map(j=>`<option value="${escapeAttr(j)}"></option>`).join("");
+  const week=$("empWeek").value,filter=$("empFilter").value,jobFilter=$("empJobFilter").value.trim();
+  let rows=empStore.entries.filter(x=>empInWeek(x.date,week)&&(!filter||x.employeeId===filter)&&(!jobFilter||x.jobNo===jobFilter)).sort((a,b)=>a.date.localeCompare(b.date)||a.employeeName.localeCompare(b.employeeName));
+  const hours=rows.reduce((s,x)=>s+(Number(x.hours)||0),0),pay=rows.reduce((s,x)=>s+(Number(x.hours)||0)*(Number(x.rate)||0),0);
+  $("empWeekHours").textContent=hours.toFixed(2).replace(/\.00$/,"");$("empWeekPay").textContent=M(pay);
+  $("empTimeRows").innerHTML=rows.length?rows.map(x=>`<tr><td data-label="Date">${escapeHtml(x.date)}</td><td data-label="Employee">${escapeHtml(x.employeeName)}</td><td data-label="Job #">${escapeHtml(x.jobNo)}</td><td data-label="Rate">${M(x.rate)}/hr</td><td data-label="Hours">${Number(x.hours).toFixed(2).replace(/\.00$/,"")}</td><td data-label="Daily Pay">${M((Number(x.hours)||0)*(Number(x.rate)||0))}</td><td data-label="Notes">${escapeHtml(x.notes||"")}</td><td class="emp-action"><button class="danger" onclick='empDeleteTime(${JSON.stringify(x.id)})'>Delete Entry</button></td></tr>`).join(""):'<tr><td colspan="8" class="muted">No time entries for this week/filter.</td></tr>';
+  const byEmp={};rows.forEach(x=>{const k=x.employeeId;if(!byEmp[k])byEmp[k]={name:x.employeeName,hours:0,pay:0,jobs:{}};byEmp[k].hours+=Number(x.hours)||0;byEmp[k].pay+=(Number(x.hours)||0)*(Number(x.rate)||0);byEmp[k].jobs[x.jobNo]=(byEmp[k].jobs[x.jobNo]||0)+(Number(x.hours)||0)});
+  $("empWeeklyCards").innerHTML=Object.values(byEmp).length?Object.values(byEmp).map(e=>`<div class="wall-card"><b>${escapeHtml(e.name)}</b><div class="metric">${e.hours.toFixed(2).replace(/\.00$/,"")} hrs • ${M(e.pay)}</div><div class="muted">${Object.entries(e.jobs).map(([j,h])=>`Job ${escapeHtml(j)}: ${h.toFixed(2).replace(/\.00$/,"")} hrs`).join(" • ")}</div></div>`).join(""):'<p class="muted">No weekly totals yet.</p>';
+  const allJob={};empStore.entries.forEach(x=>{if(!allJob[x.jobNo])allJob[x.jobNo]={hours:0,pay:0};allJob[x.jobNo].hours+=Number(x.hours)||0;allJob[x.jobNo].pay+=(Number(x.hours)||0)*(Number(x.rate)||0)});
+  $("empJobTotals").innerHTML=Object.keys(allJob).length?Object.entries(allJob).sort().map(([j,v])=>`<div class="wall-card"><b>Job ${escapeHtml(j)}</b><div class="muted">${v.hours.toFixed(2).replace(/\.00$/,"")} labor hours • ${M(v.pay)} employee labor cost</div></div>`).join(""):'<p class="muted">No job labor recorded yet.</p>';
+}
+window.addEventListener("load",()=>{if($("jtPayDate"))$("jtPayDate").value=new Date().toISOString().slice(0,10);jtNewJob();if($("empWorkDate"))$("empWorkDate").value=new Date().toISOString().slice(0,10);if($("empWeek"))$("empWeek").value=empCurrentWeekValue();empRender()});
 
 render();if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 </script></body></html>

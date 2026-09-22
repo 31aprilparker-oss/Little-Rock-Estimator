@@ -73,8 +73,16 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 }
 
 @media print{body{background:#fff;padding:0}header,nav,footer,.no-print{display:none!important}.tab{display:none}.tab.active{display:block}.card{border:0;box-shadow:none}.proposal{border:0}}
+
+#empWeeklyCards .emp-week-card{border:1px solid #dfe4e8;border-radius:14px;margin:10px 0;background:#fff;overflow:hidden}
+#empWeeklyCards .emp-week-head{padding:14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#empWeeklyCards .emp-week-body{display:none;padding:0 14px 14px}
+#empWeeklyCards .emp-week-card.open .emp-week-body{display:block}
+#empWeeklyCards .emp-week-arrow{font-size:20px;font-weight:900}
+#empOverall{border:2px solid #173f5f;border-radius:14px;padding:14px;margin-top:12px;background:#f8fbfd}
+.emp-editing{border:2px solid #173f5f!important;background:#f7fbff!important}
 </style></head><body>
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.7.3 Blueprint Takeoff, FRP, Job Tracking & Employees</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.7.4 Blueprint Takeoff, FRP, Job Tracking & Employees</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="frp">FRP</button><button data-tab="jobs">Job Tracking</button><button data-tab="employees">Employees</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <main>
 <section id="dashboard" class="tab active"><div class="card"><h2>Estimate Dashboard</h2><div class="grid"><div><span class="muted">Project</span><div class="metric" id="dProject"></div></div><div><span class="muted">Wall Area</span><div class="metric" id="dWall"></div></div><div><span class="muted">Drywall</span><div class="metric" id="dDrywall"></div></div><div><span class="muted">Bid</span><div class="metric" id="dBid"></div></div></div></div><div class="card"><h2>Workflow</h2><p class="muted">Blueprint → Project → Areas → Openings → Takeoff → Pricing → Labor → FRP → Bid</p><div class="actions"><button class="primary" onclick="tab('blueprint')">Upload Blueprint</button><button class="secondary" onclick="tab('project')">Start / Edit</button><button class="secondary" onclick="newProject()">New Project</button></div></div><div class="card"><h2>Saved Projects</h2><div id="savedList"></div></div></section>
@@ -191,11 +199,11 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
   </div>
   <div class="card"><h2>Daily Time Entry</h2>
     <div class="grid"><div><label>Employee</label><select id="empSelect"></select></div><div><label>Job #</label><input id="empJobNo" placeholder="2056" list="empJobList"><datalist id="empJobList"></datalist></div><div><label>Date Worked</label><input id="empWorkDate" type="date"></div><div><label>Hours Worked</label><input id="empHours" type="number" min="0" step=".25" placeholder="0"></div><div style="grid-column:1/-1"><label>Notes</label><input id="empNotes" placeholder="Left early, did not work, weather, no show, etc."></div></div>
-    <div class="actions"><button class="primary" onclick="empAddTime()">Add Daily Time</button></div>
+    <div class="actions"><button class="primary" id="empTimeSaveBtn" onclick="empAddTime()">Add Daily Time</button><button class="secondary" id="empTimeCancelBtn" onclick="empCancelTimeEdit()" style="display:none">Cancel Edit</button></div>
   </div>
   <div class="card"><h2>Weekly Summary</h2>
-    <div class="grid"><div><label>Week</label><input id="empWeek" type="week" onchange="empRender()"></div><div><label>Employee Filter</label><select id="empFilter" onchange="empRender()"><option value="">All Employees</option></select></div><div><label>Job # Filter</label><input id="empJobFilter" placeholder="All jobs" oninput="empRender()"></div></div>
-    <div class="grid" style="margin-top:12px"><div><span class="muted">Weekly Hours</span><div class="metric" id="empWeekHours">0</div></div><div><span class="muted">Weekly Gross Pay</span><div class="metric" id="empWeekPay">$0</div></div></div>
+    <div class="grid"><div><label>Week Starting Saturday</label><input id="empWeek" type="date" onchange="empNormalizeWeek();empRender()"></div><div><label>Employee Filter</label><select id="empFilter" onchange="empRender()"><option value="">All Employees</option></select></div><div><label>Job # Filter</label><input id="empJobFilter" placeholder="All jobs" oninput="empRender()"></div></div>
+    <div id="empOverall"><b>Overall Weekly Total • Saturday–Friday</b><div class="grid" style="margin-top:10px"><div><span class="muted">Employees</span><div class="metric" id="empWeekEmployees">0</div></div><div><span class="muted">Total Hours</span><div class="metric" id="empWeekHours">0</div></div><div><span class="muted">Total Gross Pay</span><div class="metric" id="empWeekPay">$0</div></div></div><div class="muted" id="empWeekRange" style="margin-top:8px"></div></div>
     <div id="empWeeklyCards" style="margin-top:12px"></div>
   </div>
   <div class="card"><h2>Time Entries</h2><div class="scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Job #</th><th>Rate</th><th>Hours</th><th>Daily Pay</th><th>Notes</th><th></th></tr></thead><tbody id="empTimeRows"></tbody></table></div></div>
@@ -204,7 +212,7 @@ footer{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px sol
 
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.7.3 • Building footprint + FRP + Job Tracking + Employees</footer>
+</main><footer>Azteca Elite Construction Estimator v4.7.4 • Building footprint + FRP + Job Tracking + Employees</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[],frpAreas=[];
@@ -743,10 +751,10 @@ if($("jtSavedJobs"))$("jtSavedJobs").innerHTML=Object.keys(jtStore.jobs).length?
 }
 function jtExportCsv(){if(!jtCurrent){alert("Open a job first.");return}const d=jtGet(),rows=[["Job #",d.jobNo],["Project",d.name],["Customer / GC",d.customer],["Original Contract",d.contract],["Retainage %",d.retainage],[],["LABOR CODES"],["Code","Description","Amount Due"],...d.codes.map(c=>[c.code,c.desc,c.due]),[],["CUSTOMER PAYMENTS"],["Date","Labor Code","Amount","Reference","Notes"],...d.payments.map(p=>[p.date,p.code,p.amount,p.ref,p.note]),[],["CHANGE ORDERS"],["CO #","Description","Amount","Status"],...d.cos.map(c=>[c.no,c.desc,c.amount,c.status]),[],["PAYABLES"],["Name","Type","Labor Code","Earned","Paid","Date","Reference"],...d.payables.map(p=>[p.vendor,p.type,p.code,p.earned,p.paid,p.date,p.ref])];const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`Azteca-Job-${d.jobNo}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
-// ---------- Employees v4.7.3 ----------
+// ---------- Employees v4.7.4 ----------
 const EMP_KEY="azteca_employees_v473";
 let empStore=(()=>{try{return JSON.parse(localStorage.getItem(EMP_KEY)||'{"employees":[],"entries":[]}')}catch(e){return{employees:[],entries:[]}}})();
-let empEditing=null;
+let empEditing=null,empTimeEditing=null;
 function empPersist(){localStorage.setItem(EMP_KEY,JSON.stringify(empStore))}
 function empId(){return "e"+Date.now()+Math.random().toString(36).slice(2,7)}
 function empSaveEmployee(){
@@ -772,17 +780,39 @@ function empAddTime(){
   if(!date){alert("Enter the date worked.");return}
   if(hours<0){alert("Hours cannot be negative.");return}
   if(hours===0&&!notes){alert("For a zero-hour day, add a note such as Did not work, No show, or Weather.");return}
-  empStore.entries.push({id:empId(),employeeId,employeeName:e.name,rate:Number(e.rate)||0,jobNo,date,hours,notes});
-  empPersist();$("empHours").value="";$("empNotes").value="";empRender()
+  if(empTimeEditing){
+    const x=empStore.entries.find(x=>x.id===empTimeEditing);if(!x)return;
+    x.employeeId=employeeId;x.employeeName=e.name;x.jobNo=jobNo;x.date=date;x.hours=hours;x.notes=notes;
+    x.rate=Number($("empEntryRate")?.value)||Number(x.rate)||Number(e.rate)||0;
+  }else{
+    empStore.entries.push({id:empId(),employeeId,employeeName:e.name,rate:Number(e.rate)||0,jobNo,date,hours,notes});
+  }
+  empPersist();empCancelTimeEdit();empRender()
 }
-function empDeleteTime(id){if(!confirm("Delete this time entry?"))return;empStore.entries=empStore.entries.filter(x=>x.id!==id);empPersist();empRender()}
-function empWeekStartEnd(v){
-  if(!v)return null;const [y,w]=v.split("-W").map(Number);const jan4=new Date(y,0,4),dow=jan4.getDay()||7,monday=new Date(y,0,4-(dow-1)+(w-1)*7);monday.setHours(0,0,0,0);const end=new Date(monday);end.setDate(end.getDate()+7);return[monday,end]
+function empEditTime(id){
+  const x=empStore.entries.find(x=>x.id===id);if(!x)return;empTimeEditing=id;
+  $("empSelect").value=x.employeeId;$("empJobNo").value=x.jobNo;$("empWorkDate").value=x.date;$("empHours").value=x.hours;$("empNotes").value=x.notes||"";
+  let rate=$("empEntryRate");if(!rate){rate=document.createElement("input");rate.id="empEntryRate";rate.type="number";rate.min="0";rate.step=".01";rate.style.display="none";$("empHours").parentElement.parentElement.appendChild(rate)}rate.value=x.rate;
+  $("empTimeSaveBtn").textContent="Save Entry Changes";$("empTimeCancelBtn").style.display="inline-block";
+  $("empTimeSaveBtn").closest(".card").classList.add("emp-editing");$("empTimeSaveBtn").closest(".card").scrollIntoView({behavior:"smooth",block:"start"});
+  const rateLabel=document.getElementById("empEditRateWrap");if(rateLabel)rateLabel.remove();
+  const wrap=document.createElement("div");wrap.id="empEditRateWrap";wrap.innerHTML='<label>Hourly Rate for This Entry ($)</label><input id="empEditRateVisible" type="number" min="0" step=".01" value="'+escapeAttr(x.rate)+'">';
+  $("empNotes").parentElement.before(wrap);$("empEditRateVisible").addEventListener("input",ev=>{$("empEntryRate").value=ev.target.value});
 }
-function empCurrentWeekValue(d=new Date()){
-  const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),day=x.getUTCDay()||7;x.setUTCDate(x.getUTCDate()+4-day);const y=new Date(Date.UTC(x.getUTCFullYear(),0,1));const w=Math.ceil((((x-y)/86400000)+1)/7);return x.getUTCFullYear()+"-W"+String(w).padStart(2,"0")
+function empCancelTimeEdit(){
+  empTimeEditing=null;if($("empHours"))$("empHours").value="";if($("empNotes"))$("empNotes").value="";
+  if($("empTimeSaveBtn")){$("empTimeSaveBtn").textContent="Add Daily Time";$("empTimeSaveBtn").closest(".card").classList.remove("emp-editing")}
+  if($("empTimeCancelBtn"))$("empTimeCancelBtn").style.display="none";document.getElementById("empEditRateWrap")?.remove();document.getElementById("empEntryRate")?.remove();
 }
+function empDeleteTime(id){if(!confirm("Delete this time entry?"))return;empStore.entries=empStore.entries.filter(x=>x.id!==id);if(empTimeEditing===id)empCancelTimeEdit();empPersist();empRender()}
+function empSaturdayForDate(v){
+  if(!v)return null;const d=new Date(v+"T12:00:00"),back=(d.getDay()+1)%7;d.setDate(d.getDate()-back);d.setHours(0,0,0,0);return d
+}
+function empWeekStartEnd(v){const start=empSaturdayForDate(v);if(!start)return null;const end=new Date(start);end.setDate(end.getDate()+7);return[start,end]}
+function empCurrentWeekValue(d=new Date()){const x=new Date(d);x.setHours(12,0,0,0);const back=(x.getDay()+1)%7;x.setDate(x.getDate()-back);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")}
+function empNormalizeWeek(){if(!$("empWeek").value)return;$("empWeek").value=empCurrentWeekValue(new Date($("empWeek").value+"T12:00:00"))}
 function empInWeek(date,v){const r=empWeekStartEnd(v);if(!r)return true;const d=new Date(date+"T12:00:00");return d>=r[0]&&d<r[1]}
+function empToggleWeek(id){document.getElementById("empweek-"+id)?.classList.toggle("open")}
 function empRender(){
   if(!$("employees"))return;
   const emps=empStore.employees.slice().sort((a,b)=>a.name.localeCompare(b.name));
@@ -795,10 +825,11 @@ function empRender(){
   const week=$("empWeek").value,filter=$("empFilter").value,jobFilter=$("empJobFilter").value.trim();
   let rows=empStore.entries.filter(x=>empInWeek(x.date,week)&&(!filter||x.employeeId===filter)&&(!jobFilter||x.jobNo===jobFilter)).sort((a,b)=>a.date.localeCompare(b.date)||a.employeeName.localeCompare(b.employeeName));
   const hours=rows.reduce((s,x)=>s+(Number(x.hours)||0),0),pay=rows.reduce((s,x)=>s+(Number(x.hours)||0)*(Number(x.rate)||0),0);
+  $("empWeekEmployees").textContent=new Set(rows.map(x=>x.employeeId)).size;const wr=empWeekStartEnd(week);if(wr){const last=new Date(wr[1]);last.setDate(last.getDate()-1);$("empWeekRange").textContent=wr[0].toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" – "+last.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
   $("empWeekHours").textContent=hours.toFixed(2).replace(/\.00$/,"");$("empWeekPay").textContent=M(pay);
-  $("empTimeRows").innerHTML=rows.length?rows.map(x=>`<tr><td data-label="Date">${escapeHtml(x.date)}</td><td data-label="Employee">${escapeHtml(x.employeeName)}</td><td data-label="Job #">${escapeHtml(x.jobNo)}</td><td data-label="Rate">${M(x.rate)}/hr</td><td data-label="Hours">${Number(x.hours).toFixed(2).replace(/\.00$/,"")}</td><td data-label="Daily Pay">${M((Number(x.hours)||0)*(Number(x.rate)||0))}</td><td data-label="Notes">${escapeHtml(x.notes||"")}</td><td class="emp-action"><button class="danger" onclick='empDeleteTime(${JSON.stringify(x.id)})'>Delete Entry</button></td></tr>`).join(""):'<tr><td colspan="8" class="muted">No time entries for this week/filter.</td></tr>';
+  $("empTimeRows").innerHTML=rows.length?rows.map(x=>`<tr><td data-label="Date">${escapeHtml(x.date)}</td><td data-label="Employee">${escapeHtml(x.employeeName)}</td><td data-label="Job #">${escapeHtml(x.jobNo)}</td><td data-label="Rate">${M(x.rate)}/hr</td><td data-label="Hours">${Number(x.hours).toFixed(2).replace(/\.00$/,"")}</td><td data-label="Daily Pay">${M((Number(x.hours)||0)*(Number(x.rate)||0))}</td><td data-label="Notes">${escapeHtml(x.notes||"")}</td><td class="emp-action"><div class="actions"><button class="secondary" onclick='empEditTime(${JSON.stringify(x.id)})'>Edit Entry</button><button class="danger" onclick='empDeleteTime(${JSON.stringify(x.id)})'>Delete Entry</button></div></td></tr>`).join(""):'<tr><td colspan="8" class="muted">No time entries for this week/filter.</td></tr>';
   const byEmp={};rows.forEach(x=>{const k=x.employeeId;if(!byEmp[k])byEmp[k]={name:x.employeeName,hours:0,pay:0,jobs:{}};byEmp[k].hours+=Number(x.hours)||0;byEmp[k].pay+=(Number(x.hours)||0)*(Number(x.rate)||0);byEmp[k].jobs[x.jobNo]=(byEmp[k].jobs[x.jobNo]||0)+(Number(x.hours)||0)});
-  $("empWeeklyCards").innerHTML=Object.values(byEmp).length?Object.values(byEmp).map(e=>`<div class="wall-card"><b>${escapeHtml(e.name)}</b><div class="metric">${e.hours.toFixed(2).replace(/\.00$/,"")} hrs • ${M(e.pay)}</div><div class="muted">${Object.entries(e.jobs).map(([j,h])=>`Job ${escapeHtml(j)}: ${h.toFixed(2).replace(/\.00$/,"")} hrs`).join(" • ")}</div></div>`).join(""):'<p class="muted">No weekly totals yet.</p>';
+  $("empWeeklyCards").innerHTML=Object.keys(byEmp).length?Object.entries(byEmp).map(([id,e])=>{const erows=rows.filter(x=>x.employeeId===id);return `<div class="emp-week-card" id="empweek-${escapeAttr(id)}"><div class="emp-week-head" onclick='empToggleWeek(${JSON.stringify(id)})'><div><b>${escapeHtml(e.name)}</b><div class="muted">${e.hours.toFixed(2).replace(/\.00$/," ").trim()} hrs • ${M(e.pay)}</div></div><span class="emp-week-arrow">⌄</span></div><div class="emp-week-body"><div class="muted" style="margin-bottom:8px">${Object.entries(e.jobs).map(([j,h])=>`Job ${escapeHtml(j)}: ${h.toFixed(2).replace(/\.00$/," ").trim()} hrs`).join(" • ")}</div>${erows.map(x=>`<div class="wall-card"><b>${escapeHtml(x.date)} • Job ${escapeHtml(x.jobNo)}</b><div>${Number(x.hours).toFixed(2).replace(/\.00$/," ").trim()} hrs • ${M(x.rate)}/hr • ${M((Number(x.hours)||0)*(Number(x.rate)||0))}</div>${x.notes?`<div class="muted">${escapeHtml(x.notes)}</div>`:""}<div class="actions"><button class="secondary" onclick='empEditTime(${JSON.stringify(x.id)})'>Edit Entry</button><button class="danger" onclick='empDeleteTime(${JSON.stringify(x.id)})'>Delete Entry</button></div></div>`).join("")}</div></div>`}).join(""):'<p class="muted">No weekly totals yet.</p>';
   const allJob={};empStore.entries.forEach(x=>{if(!allJob[x.jobNo])allJob[x.jobNo]={hours:0,pay:0};allJob[x.jobNo].hours+=Number(x.hours)||0;allJob[x.jobNo].pay+=(Number(x.hours)||0)*(Number(x.rate)||0)});
   $("empJobTotals").innerHTML=Object.keys(allJob).length?Object.entries(allJob).sort().map(([j,v])=>`<div class="wall-card"><b>Job ${escapeHtml(j)}</b><div class="muted">${v.hours.toFixed(2).replace(/\.00$/,"")} labor hours • ${M(v.pay)} employee labor cost</div></div>`).join(""):'<p class="muted">No job labor recorded yet.</p>';
 }

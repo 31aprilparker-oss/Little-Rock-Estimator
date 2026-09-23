@@ -1,17 +1,23 @@
 {
-  "name": "Azteca Elite Construction Estimator v4.6.2",
+  "name": "Azteca Elite Construction Estimator",
   "short_name": "Azteca Estimator",
-  "start_url": "./",
+  "start_url": "./?v=ae2",
   "display": "standalone",
-  "background_color": "#f4f6f8",
-  "theme_color": "#173f5f",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "scope": "./",
   "icons": [
     {
-      "src": "ae-icon.png",
+      "src": "ae-icon.png?v=ae2",
       "sizes": "1024x1024",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "ae-icon.png?v=ae2",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

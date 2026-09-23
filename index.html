@@ -150,8 +150,34 @@ body.home-mode .dashboard-launch button::before{display:none!important;content:n
 .section-home-btn:active{transform:scale(.98)}
 @media(max-width:520px){.section-home-row{position:sticky;top:0;z-index:15;background:#f4f6f8;padding:8px 0 6px;margin:-2px 0 8px}.section-home-btn{min-height:44px;padding:10px 16px}}
 @media print{.section-home-row{display:none!important}}
+
+/* v4.8.2 mobile navigation cleanup */
+#appHomeBtn{
+  position:static!important;
+  display:none;
+  margin:12px 12px 0;
+  width:auto;
+  z-index:auto;
+}
+body:not(.home-mode) #appHomeBtn{display:inline-block}
+@media(max-width:700px){
+  header{position:relative!important;top:auto!important}
+  #appHomeBtn{
+    position:static!important;
+    margin:12px 12px 2px!important;
+    min-height:44px;
+  }
+  .section-home-row{
+    position:static!important;
+    top:auto!important;
+    background:transparent!important;
+    padding:0!important;
+    margin:0 0 12px!important;
+  }
+}
+
 </style></head><body class="home-mode">
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.8.1 Persistent Job Tracking & Employee Pay</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.8.2 Persistent Job Tracking & Employee Pay</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="blueprint">Blueprint</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="frp">FRP</button><button data-tab="jobs">Job Tracking</button><button data-tab="employees">Employees</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <button id="appHomeBtn" class="app-home-btn no-print" onclick="tab('dashboard')">⌂ Home</button>
 <main>
@@ -294,7 +320,7 @@ body.home-mode .dashboard-launch button::before{display:none!important;content:n
 
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
 <section id="suppliers" class="tab"><div class="card"><h2>Little Rock Supplier / Reference</h2><div class="scroll"><table><thead><tr><th>Supplier / Reference</th><th>Use</th><th>Notes</th></tr></thead><tbody><tr><td>Foundation Building Materials</td><td>Drywall / framing</td><td>Verify current local pricing and availability.</td></tr><tr><td>Arkansas Wholesale Commercial Division - Little Rock</td><td>Commercial materials</td><td>Verify current local pricing and availability.</td></tr></tbody></table></div></div></section>
-</main><footer>Azteca Elite Construction Estimator v4.8.0 • Building footprint + FRP + Job Tracking + Employees</footer>
+</main><footer>Azteca Elite Construction Estimator v4.8.2 • Persistent Job Tracking + Employee Pay</footer>
 <script>
 const $=id=>document.getElementById(id),N=id=>Number($(id).value)||0,M=x=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(x);
 let areas=[{name:"Interior Walls",lf:100,height:10,stud:"3 5/8",gauge:"20",spacing:"16",drywall:"1/2 Regular",sides:2}],openings=[],frpAreas=[];
@@ -933,5 +959,5 @@ function empRender(){
 }
 window.addEventListener("load",()=>{if($("jtPayDate"))$("jtPayDate").value=new Date().toISOString().slice(0,10);jtNewJob();if($("empWorkDate"))$("empWorkDate").value=new Date().toISOString().slice(0,10);if($("empWeek"))$("empWeek").value=empCurrentWeekValue();empRender()});
 
-render();tab("dashboard");if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=481");
+render();tab("dashboard");if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=482");
 </script></body></html>

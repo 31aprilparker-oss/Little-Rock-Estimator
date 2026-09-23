@@ -1,4 +1,4 @@
-const C='azteca-v481';
+const C='azteca-v482';
 const A=['./','./index.html','./manifest.webmanifest?v=ae2','./ae-icon.png?v=ae2'];
 
 self.addEventListener('install',e=>{

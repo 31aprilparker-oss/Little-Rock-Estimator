@@ -1,8 +1,6 @@
 <!doctype html><html><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#000000"><link rel="manifest" href="manifest.webmanifest?v=ae2">
-<link rel="apple-touch-icon" sizes="1024x1024" href="ae-icon.png?v=ae2">
-<link rel="icon" type="image/png" href="ae-icon.png?v=ae2">
+<meta name="theme-color" content="#173f5f"><link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="ae-icon.png">
 <link rel="icon" type="image/png" href="ae-icon.png">
 <title>Azteca Elite Estimator</title>
@@ -153,7 +151,7 @@ body.home-mode .dashboard-launch button::before{display:none!important;content:n
 @media(max-width:520px){.section-home-row{position:sticky;top:0;z-index:15;background:#f4f6f8;padding:8px 0 6px;margin:-2px 0 8px}.section-home-btn{min-height:44px;padding:10px 16px}}
 @media print{.section-home-row{display:none!important}}
 </style></head><body class="home-mode">
-<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.8.0 Blueprint Takeoff, FRP, Job Tracking & Employees</p></header>
+<header><h1>Azteca Elite Construction</h1><p>Commercial Metal Framing & Drywall Estimator • v4.8.1 Persistent Job Tracking & Employee Pay</p></header>
 <nav><button class="active" data-tab="dashboard">Dashboard</button><button data-tab="blueprint">Blueprint</button><button data-tab="project">Project</button><button data-tab="areas">Areas</button><button data-tab="openings">Openings</button><button data-tab="takeoff">Takeoff</button><button data-tab="pricing">Pricing</button><button data-tab="labor">Labor</button><button data-tab="frp">FRP</button><button data-tab="jobs">Job Tracking</button><button data-tab="employees">Employees</button><button data-tab="bid">Bid</button><button data-tab="suppliers">Suppliers</button></nav>
 <button id="appHomeBtn" class="app-home-btn no-print" onclick="tab('dashboard')">⌂ Home</button>
 <main>
@@ -260,7 +258,18 @@ body.home-mode .dashboard-launch button::before{display:none!important;content:n
   <div class="card"><h2>Labor Codes / Amount Due</h2><div class="actions"><button class="secondary" onclick="jtAddCode()">+ Add Labor Code</button></div><div class="scroll"><table><thead><tr><th>Code</th><th>Description</th><th>Amount Due</th><th>Received</th><th>Balance</th><th>Status</th><th></th></tr></thead><tbody id="jtCodeRows"></tbody></table></div></div>
   <div class="card"><h2>Customer Payment</h2><div class="grid"><div><label>Date</label><input id="jtPayDate" type="date"></div><div><label>Labor Code</label><select id="jtPayCode"></select></div><div><label>Amount Received ($)</label><input id="jtPayAmount" type="number" step=".01"></div><div><label>Reference / Check / ACH</label><input id="jtPayRef"></div><div><label>Notes</label><input id="jtPayNote"></div></div><div class="actions"><button class="primary" onclick="jtAddPayment()">Add Payment</button></div><div class="scroll"><table><thead><tr><th>Date</th><th>Code</th><th>Amount</th><th>Reference</th><th>Notes</th><th></th></tr></thead><tbody id="jtPaymentRows"></tbody></table></div></div>
   <div class="card"><h2>Change Orders</h2><div class="grid"><div><label>CO #</label><input id="jtCoNo"></div><div><label>Description</label><input id="jtCoDesc"></div><div><label>Amount ($)</label><input id="jtCoAmount" type="number" step=".01"></div><div><label>Status</label><select id="jtCoStatus"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div></div><div class="actions"><button class="primary" onclick="jtAddCO()">Add Change Order</button></div><div class="scroll"><table><thead><tr><th>CO #</th><th>Description</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody id="jtCoRows"></tbody></table></div></div>
-    <div class="card"><h2>Saved Jobs</h2><div id="jtSavedJobs"></div></div>
+    <div class="card"><h2>Saved Jobs</h2>
+      <div class="grid">
+        <div><label>Search Saved Jobs</label><input id="jtJobSearch" placeholder="Job #, project, or customer" oninput="jtRender()"></div>
+        <div><label>Show</label><select id="jtArchiveFilter" onchange="jtRender()"><option value="active">Active Jobs</option><option value="archived">Archived Jobs</option><option value="all">All Jobs</option></select></div>
+      </div>
+      <div id="jtSavedJobs" style="margin-top:12px"></div>
+    </div>
+    <div class="card"><h2>Data Backup</h2>
+      <p class="muted">Employee time/pay and Job Tracking save automatically on this device. Export a backup so the records can be restored if the app or phone is replaced.</p>
+      <div class="actions"><button class="secondary" onclick="azExportBackup()">Export Full Backup</button><label class="secondary" style="display:inline-block;cursor:pointer">Restore Backup<input type="file" accept=".json,application/json" onchange="azImportBackup(this)" style="display:none"></label></div>
+      <div class="muted" id="azSaveStatus" style="margin-top:8px">Automatic local saving is on.</div>
+    </div>
 </section>
 
 <section id="employees" class="tab">
@@ -279,7 +288,8 @@ body.home-mode .dashboard-launch button::before{display:none!important;content:n
     <div id="empWeeklyCards" style="margin-top:12px"></div>
   </div>
   <div class="card"><h2>Time Entries</h2><div class="scroll"><table><thead><tr><th>Date</th><th>Employee</th><th>Job #</th><th>Rate</th><th>Hours</th><th>Daily Pay</th><th>Notes</th><th></th></tr></thead><tbody id="empTimeRows"></tbody></table></div></div>
-  <div class="card"><h2>Labor by Job</h2><div id="empJobTotals"></div></div>
+  <div class="card"><h2>Labor by Job</h2><p class="muted">Employee labor automatically rolls into the matching saved job number.</p><div id="empJobTotals"></div></div>
+  <div class="card"><h2>Employee Data</h2><p class="muted">Time entries and pay rates save automatically on this device.</p><div class="actions"><button class="secondary" onclick="empExportCsv()">Export Employee Time CSV</button><button class="secondary" onclick="azExportBackup()">Export Full Backup</button></div></div>
 </section>
 
 <section id="bid" class="tab"><div class="actions no-print"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="saveProject()">Save Project</button></div><div class="proposal"><h1>AZTECA ELITE CONSTRUCTION</h1><div class="muted">Commercial Metal Framing & Drywall Proposal</div><div class="line"></div><div class="grid"><div><b>Project</b><br><span id="bProject"></span></div><div><b>Customer</b><br><span id="bCustomer"></span></div><div><b>Location</b><br><span id="bAddress"></span></div><div><b>Estimate #</b><br><span id="bNo"></span></div></div><div class="line"></div><p id="bScope"></p><table><tbody id="bidRows"></tbody></table><div class="line"></div><div class="right"><b>TOTAL PROPOSED PRICE</b><div class="total" id="bTotal">$0</div></div><p class="muted">Verify plans, specifications, field conditions, manufacturer requirements, supplier quotes and production rates before issuing a contractual bid.</p></div></section>
@@ -805,11 +815,11 @@ const JT_KEY="azteca_job_tracking_v47";
 const jtDefaultCodes=()=>[{code:"1000",desc:"Interior Metal Framing",due:0},{code:"1070",desc:"Layout",due:0},{code:"2000",desc:"Wallboard",due:0},{code:"2010",desc:"Insulation",due:0},{code:"3000",desc:"Stocking",due:0},{code:"3010",desc:"Cleanup",due:0}];
 let jtStore=(()=>{try{return JSON.parse(localStorage.getItem(JT_KEY)||'{"jobs":{}}')}catch(e){return{jobs:{}}}})();
 let jtCurrent=null;
-function jtBlank(){return{jobNo:"",name:"",customer:"",contract:0,retainage:10,codes:jtDefaultCodes(),payments:[],cos:[],payables:[]}}
+function jtBlank(){return{jobNo:"",name:"",customer:"",contract:0,retainage:10,codes:jtDefaultCodes(),payments:[],cos:[],payables:[],archived:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}}
 function jtGet(){return jtCurrent&&jtStore.jobs[jtCurrent]?jtStore.jobs[jtCurrent]:jtBlank()}
-function jtPersist(){localStorage.setItem(JT_KEY,JSON.stringify(jtStore))}
+function jtPersist(){localStorage.setItem(JT_KEY,JSON.stringify(jtStore));azTouchSaved()}
 function jtNewJob(){jtCurrent=null;const d=jtBlank();$("jtJobNo").value="";$("jtJobName").value=$("projectName")?.value||"";$("jtCustomer").value=$("customer")?.value||"";$("jtContract").value=0;$("jtRetainage").value=10;jtRender(d)}
-function jtSaveJob(){const no=$("jtJobNo").value.trim();if(!no){alert("Enter a Job # first.");return}let d=jtGet();if(!jtCurrent||jtCurrent!==no)d={...d};d.jobNo=no;d.name=$("jtJobName").value.trim();d.customer=$("jtCustomer").value.trim();d.contract=N("jtContract");d.retainage=N("jtRetainage");if(jtCurrent&&jtCurrent!==no)delete jtStore.jobs[jtCurrent];jtStore.jobs[no]=d;jtCurrent=no;jtPersist();jtRender();alert("Job saved on this device.")}
+function jtSaveJob(){const no=$("jtJobNo").value.trim();if(!no){alert("Enter a Job # first.");return}let d=jtGet();if(!jtCurrent||jtCurrent!==no)d={...d};d.jobNo=no;d.name=$("jtJobName").value.trim();d.customer=$("jtCustomer").value.trim();d.contract=N("jtContract");d.retainage=N("jtRetainage");d.updatedAt=new Date().toISOString();if(d.archived==null)d.archived=false;if(jtCurrent&&jtCurrent!==no)delete jtStore.jobs[jtCurrent];jtStore.jobs[no]=d;jtCurrent=no;jtPersist();jtRender();alert("Job saved on this device.")}
 function jtLoad(no){const d=jtStore.jobs[no];if(!d)return;jtCurrent=no;$("jtJobNo").value=d.jobNo||no;$("jtJobName").value=d.name||"";$("jtCustomer").value=d.customer||"";$("jtContract").value=d.contract||0;$("jtRetainage").value=d.retainage??10;jtRender();tab("jobs")}
 function jtDeleteJob(no){if(!confirm("Delete job "+no+"?"))return;delete jtStore.jobs[no];if(jtCurrent===no)jtCurrent=null;jtPersist();jtNewJob()}
 function jtToggleCode(el){const row=el.closest("tr");if(row)row.classList.toggle("jt-open")}
@@ -829,15 +839,21 @@ const opts=d.codes.map(c=>`<option value="${escapeAttr(c.code)}">${escapeHtml(c.
 if($("jtPaymentRows"))$("jtPaymentRows").innerHTML=d.payments.map((p,i)=>`<tr><td data-label="Date">${escapeHtml(p.date||"")}</td><td data-label="Labor Code">${escapeHtml(p.code||"")}</td><td data-label="Amount">${M(p.amount||0)}</td><td data-label="Reference">${escapeHtml(p.ref||"")}</td><td data-label="Notes">${escapeHtml(p.note||"")}</td><td class="jt-action"><button class="danger" onclick="jtDeletePayment(${i})">Delete Payment</button></td></tr>`).join("")||'<tr><td colspan="6" class="muted">No payments entered.</td></tr>';
 if($("jtCoRows"))$("jtCoRows").innerHTML=d.cos.map((c,i)=>`<tr><td data-label="CO #">${escapeHtml(c.no||"")}</td><td data-label="Description">${escapeHtml(c.desc||"")}</td><td data-label="Amount">${M(c.amount||0)}</td><td data-label="Status">${escapeHtml(c.status||"")}</td><td class="jt-action"><button class="danger" onclick="jtDeleteCO(${i})">Delete Change Order</button></td></tr>`).join("")||'<tr><td colspan="5" class="muted">No change orders entered.</td></tr>';
 if($("jtPayableRows"))$("jtPayableRows").innerHTML=d.payables.map((p,i)=>`<tr><td data-label="Name">${escapeHtml(p.vendor||"")}</td><td data-label="Type">${escapeHtml(p.type||"")}</td><td data-label="Labor Code">${escapeHtml(p.code||"")}</td><td data-label="Earned">${M(p.earned||0)}</td><td data-label="Paid">${M(p.paid||0)}</td><td data-label="Balance">${M(Math.max(0,(p.earned||0)-(p.paid||0)))}</td><td class="jt-action"><button class="danger" onclick="jtDeletePayable(${i})">Delete Payable</button></td></tr>`).join("")||'<tr><td colspan="7" class="muted">No payables entered.</td></tr>';
-if($("jtSavedJobs"))$("jtSavedJobs").innerHTML=Object.keys(jtStore.jobs).length?Object.keys(jtStore.jobs).map(no=>{const j=jtStore.jobs[no];return `<div class="wall-card"><div class="wall-head"><div><b>Job ${escapeHtml(no)}</b><div class="muted">${escapeHtml(j.name||"")} • ${escapeHtml(j.customer||"")}</div></div></div><div class="actions"><button class="secondary" onclick='jtLoad(${JSON.stringify(no)})'>Open</button><button class="danger" onclick='jtDeleteJob(${JSON.stringify(no)})'>Delete</button></div></div>`}).join(""):'<p class="muted">No saved jobs yet.</p>';
+if($("jtSavedJobs")){const q=($("jtJobSearch")?.value||"").trim().toLowerCase(),af=$("jtArchiveFilter")?.value||"active";const list=Object.keys(jtStore.jobs).filter(no=>{const j=jtStore.jobs[no],hay=(no+" "+(j.name||"")+" "+(j.customer||"")).toLowerCase();return(!q||hay.includes(q))&&(af==="all"||(af==="archived"?!!j.archived:!j.archived))});$("jtSavedJobs").innerHTML=list.length?list.sort().map(no=>{const j=jtStore.jobs[no],er=empStore.entries.filter(x=>x.jobNo===no),lab=er.reduce((s,x)=>s+(Number(x.hours)||0)*(Number(x.rate)||0),0),hrs=er.reduce((s,x)=>s+(Number(x.hours)||0),0);return `<div class="wall-card"><div class="wall-head"><div><b>Job ${escapeHtml(no)}</b><div class="muted">${escapeHtml(j.name||"")} • ${escapeHtml(j.customer||"")}</div><div class="muted">${hrs.toFixed(2).replace(/\.00$/,"")} employee hrs • ${M(lab)} employee labor${j.archived?" • ARCHIVED":""}</div></div></div><div class="actions"><button class="secondary" onclick='jtLoad(${JSON.stringify(no)})'>Open</button><button class="secondary" onclick='jtToggleArchive(${JSON.stringify(no)})'>${j.archived?"Restore Job":"Archive Job"}</button><button class="danger" onclick='jtDeleteJob(${JSON.stringify(no)})'>Delete</button></div></div>`}).join(""):'<p class="muted">No jobs match this view.</p>'}
 }
 function jtExportCsv(){if(!jtCurrent){alert("Open a job first.");return}const d=jtGet(),rows=[["Job #",d.jobNo],["Project",d.name],["Customer / GC",d.customer],["Original Contract",d.contract],["Retainage %",d.retainage],[],["LABOR CODES"],["Code","Description","Amount Due"],...d.codes.map(c=>[c.code,c.desc,c.due]),[],["CUSTOMER PAYMENTS"],["Date","Labor Code","Amount","Reference","Notes"],...d.payments.map(p=>[p.date,p.code,p.amount,p.ref,p.note]),[],["CHANGE ORDERS"],["CO #","Description","Amount","Status"],...d.cos.map(c=>[c.no,c.desc,c.amount,c.status]),[],["PAYABLES"],["Name","Type","Labor Code","Earned","Paid","Date","Reference"],...d.payables.map(p=>[p.vendor,p.type,p.code,p.earned,p.paid,p.date,p.ref])];const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=`Azteca-Job-${d.jobNo}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+
+function jtToggleArchive(no){const j=jtStore.jobs[no];if(!j)return;j.archived=!j.archived;j.updatedAt=new Date().toISOString();jtPersist();jtRender()}
+function azTouchSaved(){const el=document.getElementById("azSaveStatus");if(el)el.textContent="Saved automatically • "+new Date().toLocaleString()}
+function azExportBackup(){const payload={format:"Azteca Elite Estimator Backup",version:1,exportedAt:new Date().toISOString(),jobTracking:jtStore,employees:empStore};const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:"application/json"}));a.download="Azteca-Elite-Backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function azImportBackup(input){const f=input.files&&input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const p=JSON.parse(rd.result);if(!p||!p.jobTracking||!p.employees)throw new Error("Invalid backup");if(!confirm("Restore this backup? Current Employee and Job Tracking data on this device will be replaced."))return;jtStore=p.jobTracking;empStore=p.employees;jtPersist();empPersist();jtCurrent=null;jtNewJob();empRender();alert("Backup restored.")}catch(e){alert("That file is not a valid Azteca Elite backup.")}finally{input.value=""}};rd.readAsText(f)}
+function empExportCsv(){const rows=[["Date","Employee","Job #","Hourly Rate","Hours","Gross Pay","Notes"],...empStore.entries.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.employeeName.localeCompare(b.employeeName)).map(x=>[x.date,x.employeeName,x.jobNo,x.rate,x.hours,(Number(x.rate)||0)*(Number(x.hours)||0),x.notes||""])];const csv=rows.map(r=>r.map(v=>`"${String(v??"").replace(/"/g,'""')}"`).join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="Azteca-Employee-Time-"+new Date().toISOString().slice(0,10)+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
 // ---------- Employees v4.7.4 ----------
 const EMP_KEY="azteca_employees_v473";
 let empStore=(()=>{try{return JSON.parse(localStorage.getItem(EMP_KEY)||'{"employees":[],"entries":[]}')}catch(e){return{employees:[],entries:[]}}})();
 let empEditing=null,empTimeEditing=null;
-function empPersist(){localStorage.setItem(EMP_KEY,JSON.stringify(empStore))}
+function empPersist(){localStorage.setItem(EMP_KEY,JSON.stringify(empStore));azTouchSaved()}
 function empId(){return "e"+Date.now()+Math.random().toString(36).slice(2,7)}
 function empSaveEmployee(){
   const name=$("empName").value.trim(),rate=N("empRate");
@@ -917,5 +933,5 @@ function empRender(){
 }
 window.addEventListener("load",()=>{if($("jtPayDate"))$("jtPayDate").value=new Date().toISOString().slice(0,10);jtNewJob();if($("empWorkDate"))$("empWorkDate").value=new Date().toISOString().slice(0,10);if($("empWeek"))$("empWeek").value=empCurrentWeekValue();empRender()});
 
-render();tab("dashboard");if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
+render();tab("dashboard");if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js?v=481");
 </script></body></html>
